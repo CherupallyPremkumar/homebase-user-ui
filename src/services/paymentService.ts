@@ -4,11 +4,12 @@ import { CreatePaymentRequestDto, CreatePaymentResponseDto } from "@/types/dto";
 const API_BASE_URL = "/api";
 
 export const paymentService = {
-  // POST /api/payment/create
-  createPayment: async (request: CreatePaymentRequestDto): Promise<CreatePaymentResponseDto> => {
+  // POST /api/payment/create?tenantId={tenantId}
+  createPayment: async (request: CreatePaymentRequestDto, tenantId?: string): Promise<CreatePaymentResponseDto> => {
     // TODO: Implement actual API call to Spring Boot backend
     // This will initiate PhonePe payment gateway integration
-    // const response = await fetch(`${API_BASE_URL}/payment/create`, {
+    // Include tenant ID to ensure payment is associated with correct tenant
+    // const response = await fetch(`${API_BASE_URL}/payment/create?tenantId=${tenantId}`, {
     //   method: 'POST',
     //   headers: { 'Content-Type': 'application/json' },
     //   credentials: 'include',
@@ -40,16 +41,16 @@ export const paymentService = {
     });
   },
 
-  // POST /api/payment/callback
+  // POST /api/payment/callback?tenantId={tenantId}
   // This endpoint will be called by PhonePe after payment completion
-  handlePaymentCallback: async (transactionId: string): Promise<{
+  handlePaymentCallback: async (transactionId: string, tenantId?: string): Promise<{
     success: boolean;
     orderId?: string;
     message?: string;
   }> => {
     // TODO: Implement actual API call to Spring Boot backend
     // Backend will verify payment status with PhonePe and update order
-    // const response = await fetch(`${API_BASE_URL}/payment/callback`, {
+    // const response = await fetch(`${API_BASE_URL}/payment/callback?tenantId=${tenantId}`, {
     //   method: 'POST',
     //   headers: { 'Content-Type': 'application/json' },
     //   credentials: 'include',
@@ -79,15 +80,16 @@ export const paymentService = {
     });
   },
 
-  // GET /api/payment/status/{transactionId}
-  checkPaymentStatus: async (transactionId: string): Promise<{
+  // GET /api/payment/status/{transactionId}?tenantId={tenantId}
+  checkPaymentStatus: async (transactionId: string, tenantId?: string): Promise<{
     status: "PENDING" | "SUCCESS" | "FAILED";
     orderId?: string;
   }> => {
     // TODO: Implement actual API call to Spring Boot backend
-    // const response = await fetch(`${API_BASE_URL}/payment/status/${transactionId}`, {
-    //   credentials: 'include',
-    // });
+    // const response = await fetch(
+    //   `${API_BASE_URL}/payment/status/${transactionId}?tenantId=${tenantId}`,
+    //   { credentials: 'include' }
+    // );
     // if (!response.ok) throw new Error('Failed to check payment status');
     // return response.json();
     

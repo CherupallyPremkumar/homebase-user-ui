@@ -68,23 +68,29 @@ const mockProducts: ProductDto[] = [
 ];
 
 export const productService = {
-  // GET /api/products
-  getAllProducts: async (): Promise<ProductDto[]> => {
+  // GET /api/products?tenantId={tenantId}
+  getAllProducts: async (tenantId?: string): Promise<ProductDto[]> => {
     // TODO: Implement actual API call to Spring Boot backend
-    // const response = await fetch(`${API_BASE_URL}/products`);
+    // Include tenant ID in request to get tenant-specific products
+    // const response = await fetch(`${API_BASE_URL}/products?tenantId=${tenantId}`, {
+    //   credentials: 'include',
+    // });
     // if (!response.ok) throw new Error('Failed to fetch products');
     // return response.json();
     
-    // Mock implementation
+    // Mock implementation - returns same products for all tenants
+    // In real implementation, backend will filter by tenant
     return new Promise((resolve) => {
       setTimeout(() => resolve(mockProducts), 500);
     });
   },
 
-  // GET /api/products/{id}
-  getProductById: async (id: number): Promise<ProductDto | null> => {
+  // GET /api/products/{id}?tenantId={tenantId}
+  getProductById: async (id: number, tenantId?: string): Promise<ProductDto | null> => {
     // TODO: Implement actual API call to Spring Boot backend
-    // const response = await fetch(`${API_BASE_URL}/products/${id}`);
+    // const response = await fetch(`${API_BASE_URL}/products/${id}?tenantId=${tenantId}`, {
+    //   credentials: 'include',
+    // });
     // if (!response.ok) throw new Error('Failed to fetch product');
     // return response.json();
     
@@ -97,10 +103,13 @@ export const productService = {
     });
   },
 
-  // GET /api/products?category={category}
-  getProductsByCategory: async (category: string): Promise<ProductDto[]> => {
+  // GET /api/products?category={category}&tenantId={tenantId}
+  getProductsByCategory: async (category: string, tenantId?: string): Promise<ProductDto[]> => {
     // TODO: Implement actual API call to Spring Boot backend
-    // const response = await fetch(`${API_BASE_URL}/products?category=${category}`);
+    // const response = await fetch(
+    //   `${API_BASE_URL}/products?category=${category}&tenantId=${tenantId}`,
+    //   { credentials: 'include' }
+    // );
     // if (!response.ok) throw new Error('Failed to fetch products');
     // return response.json();
     

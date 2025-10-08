@@ -71,11 +71,11 @@ const mockOrders: OrderDto[] = [
 ];
 
 export const orderService = {
-  // GET /api/orders
-  getAllOrders: async (): Promise<OrderDto[]> => {
+  // GET /api/orders?tenantId={tenantId}
+  getAllOrders: async (tenantId?: string): Promise<OrderDto[]> => {
     // TODO: Implement actual API call to Spring Boot backend
-    // This will fetch all orders for the logged-in user
-    // const response = await fetch(`${API_BASE_URL}/orders`, {
+    // This will fetch all orders for the logged-in user within the tenant
+    // const response = await fetch(`${API_BASE_URL}/orders?tenantId=${tenantId}`, {
     //   credentials: 'include',
     // });
     // if (!response.ok) throw new Error('Failed to fetch orders');
@@ -87,10 +87,10 @@ export const orderService = {
     });
   },
 
-  // GET /api/order/{id}
-  getOrderById: async (orderId: string): Promise<OrderDto | null> => {
+  // GET /api/order/{id}?tenantId={tenantId}
+  getOrderById: async (orderId: string, tenantId?: string): Promise<OrderDto | null> => {
     // TODO: Implement actual API call to Spring Boot backend
-    // const response = await fetch(`${API_BASE_URL}/order/${orderId}`, {
+    // const response = await fetch(`${API_BASE_URL}/order/${orderId}?tenantId=${tenantId}`, {
     //   credentials: 'include',
     // });
     // if (!response.ok) throw new Error('Failed to fetch order');
@@ -105,11 +105,11 @@ export const orderService = {
     });
   },
 
-  // POST /api/order
-  createOrder: async (orderData: Partial<OrderDto>): Promise<OrderDto> => {
+  // POST /api/order?tenantId={tenantId}
+  createOrder: async (orderData: Partial<OrderDto>, tenantId?: string): Promise<OrderDto> => {
     // TODO: Implement actual API call to Spring Boot backend
     // This will create a new order from cart items
-    // const response = await fetch(`${API_BASE_URL}/order`, {
+    // const response = await fetch(`${API_BASE_URL}/order?tenantId=${tenantId}`, {
     //   method: 'POST',
     //   headers: { 'Content-Type': 'application/json' },
     //   credentials: 'include',

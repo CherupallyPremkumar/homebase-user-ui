@@ -3,6 +3,7 @@ import { ProductDto } from "@/types/dto";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useTenant } from "@/hooks/useTenant";
 import { ShoppingCart } from "lucide-react";
 
 interface ProductCardProps {
@@ -11,12 +12,13 @@ interface ProductCardProps {
 }
 
 export const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
+  const { buildRoute } = useTenant();
   const isOutOfStock = product.stock === 0;
   const isLowStock = product.stock > 0 && product.stock <= 5;
 
   return (
     <Card className="overflow-hidden hover-lift group">
-      <Link to={`/product/${product.id}`}>
+      <Link to={buildRoute(`/product/${product.id}`)}>
         <div className="aspect-square overflow-hidden bg-muted">
           <img
             src={product.imageUrl}
@@ -28,7 +30,7 @@ export const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
       
       <div className="p-4 space-y-3">
         <div className="space-y-1">
-          <Link to={`/product/${product.id}`}>
+          <Link to={buildRoute(`/product/${product.id}`)}>
             <h3 className="font-display font-semibold text-lg text-foreground hover:text-primary transition-base line-clamp-1">
               {product.name}
             </h3>

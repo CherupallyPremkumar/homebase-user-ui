@@ -11,10 +11,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/hooks/use-toast";
+import { useTenant } from "@/hooks/useTenant";
 import { Loader2, CreditCard } from "lucide-react";
 
 const Checkout = () => {
   const navigate = useNavigate();
+  const { tenant, buildRoute } = useTenant();
   const [cartItems, setCartItems] = useState<CartItemDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
@@ -29,14 +31,16 @@ const Checkout = () => {
   });
 
   useEffect(() => {
-    loadCart();
-  }, []);
+    if (tenant) {
+      loadCart();
+    }
+  }, [tenant]);
 
   const loadCart = async () => {
     try {
-      const data = await cartService.getCart();
+      const data = await cartService.getCart(tenant?.id);
       if (data.length === 0) {
-        navigate("/cart");
+        navigate(buildRoute("/cart"));
         return;
       }
       setCartItems(data);
@@ -109,7 +113,7 @@ const Checkout = () => {
         tax,
         shippingCost: shipping,
         total,
-      });
+      }, tenant?.id);
 
       // TODO: Initiate PhonePe payment
       const paymentRequest = {
@@ -118,11 +122,11 @@ const Checkout = () => {
         orderId: order.id,
         customerPhone: `+91${formData.customerPhone}`,
         customerName: formData.customerName,
-        redirectUrl: `${window.location.origin}/order/${order.id}`,
+        redirectUrl: `${window.location.origin}${buildRoute(`/order/${order.id}`)}`,
         callbackUrl: `${window.location.origin}/api/payment/callback`,
       };
 
-      const paymentResponse = await paymentService.createPayment(paymentRequest);
+      const paymentResponse = await paymentService.createPayment(paymentRequest, tenant?.id);
 
       if (paymentResponse.success && paymentResponse.paymentUrl) {
         // Redirect to payment gateway

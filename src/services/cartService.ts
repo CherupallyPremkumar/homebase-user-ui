@@ -8,10 +8,11 @@ const API_BASE_URL = "/api";
 let mockCart: CartItemDto[] = [];
 
 export const cartService = {
-  // GET /api/cart
-  getCart: async (): Promise<CartItemDto[]> => {
+  // GET /api/cart?tenantId={tenantId}
+  getCart: async (tenantId?: string): Promise<CartItemDto[]> => {
     // TODO: Implement actual API call to Spring Boot backend
-    // const response = await fetch(`${API_BASE_URL}/cart`, {
+    // Include tenant ID to get tenant-specific cart
+    // const response = await fetch(`${API_BASE_URL}/cart?tenantId=${tenantId}`, {
     //   credentials: 'include',
     // });
     // if (!response.ok) throw new Error('Failed to fetch cart');
@@ -23,10 +24,10 @@ export const cartService = {
     });
   },
 
-  // POST /api/cart
-  addToCart: async (productId: number, quantity: number = 1): Promise<CartItemDto> => {
+  // POST /api/cart?tenantId={tenantId}
+  addToCart: async (productId: number, quantity: number = 1, tenantId?: string): Promise<CartItemDto> => {
     // TODO: Implement actual API call to Spring Boot backend
-    // const response = await fetch(`${API_BASE_URL}/cart`, {
+    // const response = await fetch(`${API_BASE_URL}/cart?tenantId=${tenantId}`, {
     //   method: 'POST',
     //   headers: { 'Content-Type': 'application/json' },
     //   credentials: 'include',
@@ -46,7 +47,7 @@ export const cartService = {
           resolve(existingItem);
         } else {
           // Get product details for cart item
-          const product = await productService.getProductById(productId);
+          const product = await productService.getProductById(productId, tenantId);
           if (!product) throw new Error('Product not found');
           
           const newItem: CartItemDto = {
@@ -65,10 +66,10 @@ export const cartService = {
     });
   },
 
-  // PUT /api/cart/{itemId}
-  updateCartItem: async (itemId: number, quantity: number): Promise<CartItemDto> => {
+  // PUT /api/cart/{itemId}?tenantId={tenantId}
+  updateCartItem: async (itemId: number, quantity: number, tenantId?: string): Promise<CartItemDto> => {
     // TODO: Implement actual API call to Spring Boot backend
-    // const response = await fetch(`${API_BASE_URL}/cart/${itemId}`, {
+    // const response = await fetch(`${API_BASE_URL}/cart/${itemId}?tenantId=${tenantId}`, {
     //   method: 'PUT',
     //   headers: { 'Content-Type': 'application/json' },
     //   credentials: 'include',
@@ -92,10 +93,10 @@ export const cartService = {
     });
   },
 
-  // DELETE /api/cart/{itemId}
-  removeFromCart: async (itemId: number): Promise<void> => {
+  // DELETE /api/cart/{itemId}?tenantId={tenantId}
+  removeFromCart: async (itemId: number, tenantId?: string): Promise<void> => {
     // TODO: Implement actual API call to Spring Boot backend
-    // const response = await fetch(`${API_BASE_URL}/cart/${itemId}`, {
+    // const response = await fetch(`${API_BASE_URL}/cart/${itemId}?tenantId=${tenantId}`, {
     //   method: 'DELETE',
     //   credentials: 'include',
     // });
@@ -110,10 +111,10 @@ export const cartService = {
     });
   },
 
-  // DELETE /api/cart
-  clearCart: async (): Promise<void> => {
+  // DELETE /api/cart?tenantId={tenantId}
+  clearCart: async (tenantId?: string): Promise<void> => {
     // TODO: Implement actual API call to Spring Boot backend
-    // const response = await fetch(`${API_BASE_URL}/cart`, {
+    // const response = await fetch(`${API_BASE_URL}/cart?tenantId=${tenantId}`, {
     //   method: 'DELETE',
     //   credentials: 'include',
     // });

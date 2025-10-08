@@ -8,6 +8,7 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
+    /* Default theme - will be overridden by tenant theme */
     /* Warm earth tone palette for home decor */
     --background: 45 35% 96%;
     --foreground: 25 20% 20%;
@@ -46,6 +47,10 @@ All colors MUST be HSL.
     /* Custom design tokens */
     --success: 140 60% 45%;
     --warning: 35 90% 55%;
+    
+    /* Font families - dynamically updated by tenant theme */
+    --font-display: 'Playfair Display', serif;
+    --font-body: 'Inter', sans-serif;
     
     /* Shadows */
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);

@@ -7,25 +7,27 @@ import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
+import { useTenant } from "@/hooks/useTenant";
 import { ShoppingCart, ArrowLeft, Loader2, Package } from "lucide-react";
 
 const ProductDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { tenant, buildRoute } = useTenant();
   const [product, setProduct] = useState<ProductDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [cartItemCount, setCartItemCount] = useState(0);
 
   useEffect(() => {
-    if (id) {
+    if (id && tenant) {
       loadProduct(parseInt(id));
       loadCartCount();
     }
-  }, [id]);
+  }, [id, tenant]);
 
   const loadProduct = async (productId: number) => {
     try {
-      const data = await productService.getProductById(productId);
+      const data = await productService.getProductById(productId, tenant?.id);
       setProduct(data);
     } catch (error) {
       toast({
@@ -40,7 +42,7 @@ const ProductDetails = () => {
 
   const loadCartCount = async () => {
     try {
-      const cart = await cartService.getCart();
+      const cart = await cartService.getCart(tenant?.id);
       setCartItemCount(cart.length);
     } catch (error) {
       console.error("Failed to load cart count", error);
@@ -51,7 +53,7 @@ const ProductDetails = () => {
     if (!product) return;
     
     try {
-      await cartService.addToCart(product.id, 1);
+      await cartService.addToCart(product.id, 1, tenant?.id);
       setCartItemCount((prev) => prev + 1);
       toast({
         title: "Added to cart",
@@ -102,7 +104,7 @@ const ProductDetails = () => {
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Button
           variant="ghost"
-          onClick={() => navigate("/")}
+          onClick={() => navigate(buildRoute("/"))}
           className="mb-6"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />

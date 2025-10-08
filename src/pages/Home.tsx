@@ -5,21 +5,25 @@ import { cartService } from "@/services/cartService";
 import { ProductCard } from "@/components/ProductCard";
 import { Header } from "@/components/Header";
 import { toast } from "@/hooks/use-toast";
+import { useTenant } from "@/hooks/useTenant";
 import { Loader2 } from "lucide-react";
 
 const Home = () => {
+  const { tenant } = useTenant();
   const [products, setProducts] = useState<ProductDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [cartItemCount, setCartItemCount] = useState(0);
 
   useEffect(() => {
-    loadProducts();
-    loadCartCount();
-  }, []);
+    if (tenant) {
+      loadProducts();
+      loadCartCount();
+    }
+  }, [tenant]);
 
   const loadProducts = async () => {
     try {
-      const data = await productService.getAllProducts();
+      const data = await productService.getAllProducts(tenant?.id);
       setProducts(data);
     } catch (error) {
       toast({
@@ -34,7 +38,7 @@ const Home = () => {
 
   const loadCartCount = async () => {
     try {
-      const cart = await cartService.getCart();
+      const cart = await cartService.getCart(tenant?.id);
       setCartItemCount(cart.length);
     } catch (error) {
       console.error("Failed to load cart count", error);
@@ -43,7 +47,7 @@ const Home = () => {
 
   const handleAddToCart = async (productId: number) => {
     try {
-      await cartService.addToCart(productId, 1);
+      await cartService.addToCart(productId, 1, tenant?.id);
       setCartItemCount((prev) => prev + 1);
       toast({
         title: "Added to cart",

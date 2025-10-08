@@ -8,20 +8,24 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/hooks/use-toast";
+import { useTenant } from "@/hooks/useTenant";
 import { Loader2, ShoppingBag, ArrowRight } from "lucide-react";
 
 const Cart = () => {
   const navigate = useNavigate();
+  const { tenant, buildRoute } = useTenant();
   const [cartItems, setCartItems] = useState<CartItemDto[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadCart();
-  }, []);
+    if (tenant) {
+      loadCart();
+    }
+  }, [tenant]);
 
   const loadCart = async () => {
     try {
-      const data = await cartService.getCart();
+      const data = await cartService.getCart(tenant?.id);
       setCartItems(data);
     } catch (error) {
       toast({
@@ -36,7 +40,7 @@ const Cart = () => {
 
   const handleUpdateQuantity = async (itemId: number, quantity: number) => {
     try {
-      await cartService.updateCartItem(itemId, quantity);
+      await cartService.updateCartItem(itemId, quantity, tenant?.id);
       setCartItems((items) =>
         items.map((item) =>
           item.id === itemId
@@ -55,7 +59,7 @@ const Cart = () => {
 
   const handleRemoveItem = async (itemId: number) => {
     try {
-      await cartService.removeFromCart(itemId);
+      await cartService.removeFromCart(itemId, tenant?.id);
       setCartItems((items) => items.filter((item) => item.id !== itemId));
       toast({
         title: "Removed",
@@ -98,7 +102,7 @@ const Cart = () => {
           <p className="text-muted-foreground mb-6">
             Start adding some beautiful items to your cart
           </p>
-          <Button onClick={() => navigate("/")}>
+          <Button onClick={() => navigate(buildRoute("/"))}>
             Continue Shopping
           </Button>
         </div>
@@ -170,7 +174,7 @@ const Cart = () => {
               <Button
                 size="lg"
                 className="w-full gap-2"
-                onClick={() => navigate("/checkout")}
+                onClick={() => navigate(buildRoute("/checkout"))}
               >
                 Proceed to Checkout
                 <ArrowRight className="h-4 w-4" />
