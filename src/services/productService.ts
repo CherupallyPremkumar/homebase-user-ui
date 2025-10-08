@@ -19,6 +19,7 @@ const mockProducts: ProductDto[] = [
     imageUrl: productVase,
     category: "Decor",
     stock: 15,
+    rating: 4.8,
   },
   {
     id: 2,
@@ -28,6 +29,7 @@ const mockProducts: ProductDto[] = [
     imageUrl: productWallHanging,
     category: "Wall Art",
     stock: 8,
+    rating: 4.6,
   },
   {
     id: 3,
@@ -37,6 +39,7 @@ const mockProducts: ProductDto[] = [
     imageUrl: productPlanters,
     category: "Planters",
     stock: 25,
+    rating: 4.9,
   },
   {
     id: 4,
@@ -46,6 +49,7 @@ const mockProducts: ProductDto[] = [
     imageUrl: productCushion,
     category: "Textiles",
     stock: 30,
+    rating: 4.7,
   },
   {
     id: 5,
@@ -55,6 +59,7 @@ const mockProducts: ProductDto[] = [
     imageUrl: productCandlesticks,
     category: "Decor",
     stock: 12,
+    rating: 4.5,
   },
   {
     id: 6,
@@ -64,6 +69,7 @@ const mockProducts: ProductDto[] = [
     imageUrl: productBasket,
     category: "Storage",
     stock: 10,
+    rating: 4.8,
   },
 ];
 

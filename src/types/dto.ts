@@ -8,6 +8,7 @@ export interface ProductDto {
   imageUrl: string;
   category: string;
   stock: number;
+  rating?: number;
   createdAt?: string;
 }
 

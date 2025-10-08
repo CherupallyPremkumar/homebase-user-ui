@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useTenant } from "@/hooks/useTenant";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, Star } from "lucide-react";
 
 interface ProductCardProps {
   product: ProductDto;
@@ -35,6 +35,12 @@ export const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
               {product.name}
             </h3>
           </Link>
+          {product.rating && (
+            <div className="flex items-center gap-1">
+              <Star className="h-3 w-3 sm:h-4 sm:w-4 fill-primary text-primary" />
+              <span className="text-xs sm:text-sm font-medium text-foreground">{product.rating}</span>
+            </div>
+          )}
           <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 hidden sm:block">
             {product.description}
           </p>
