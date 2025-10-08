@@ -87,3 +87,37 @@ export interface CheckoutFormData {
   state: string;
   pincode: string;
 }
+
+export interface AddressDto {
+  id: string;
+  label: string;
+  fullName: string;
+  phone: string;
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  state: string;
+  pincode: string;
+  isDefault: boolean;
+}
+
+export interface CustomerProfileDto {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  addresses: AddressDto[];
+  notificationSettings: NotificationSettingsDto;
+  tenantId: string;
+}
+
+export interface NotificationSettingsDto {
+  orderUpdates: boolean;
+  promotions: boolean;
+  newsletter: boolean;
+}
+
+export interface UpdateProfileDto {
+  name: string;
+  phone?: string;
+}

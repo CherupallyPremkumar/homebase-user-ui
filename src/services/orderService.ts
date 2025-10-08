@@ -70,6 +70,18 @@ const mockOrders: OrderDto[] = [
   },
 ];
 
+/**
+ * Get all orders for the current user
+ */
+export const getOrders = async (tenantId: string): Promise<OrderDto[]> => {
+  // TODO: Replace with actual API call
+  // const response = await fetch(`/api/orders?tenantId=${tenantId}`);
+  // return await response.json();
+
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  return mockOrders;
+};
+
 export const orderService = {
   // GET /api/orders?tenantId={tenantId}
   getAllOrders: async (tenantId?: string): Promise<OrderDto[]> => {
