@@ -1,11 +1,12 @@
 import React, { createContext, useState, useEffect, ReactNode } from "react";
 import { TenantConfig, TenantContextType } from "@/types/tenant";
-import { detectTenant } from "@/utils/tenantDetection";
+import { detectTenant, buildTenantRoute } from "@/utils/tenantDetection";
 
 export const TenantContext = createContext<TenantContextType>({
   tenant: null,
   isLoading: true,
   setTenant: () => {},
+  buildRoute: (route: string) => route,
 });
 
 interface TenantProviderProps {
@@ -28,8 +29,13 @@ export const TenantProvider = ({ children }: TenantProviderProps) => {
     }
   }, []);
 
+  const buildRoute = (route: string): string => {
+    if (!tenant) return route;
+    return buildTenantRoute(tenant, route);
+  };
+
   return (
-    <TenantContext.Provider value={{ tenant, isLoading, setTenant }}>
+    <TenantContext.Provider value={{ tenant, isLoading, setTenant, buildRoute }}>
       {children}
     </TenantContext.Provider>
   );

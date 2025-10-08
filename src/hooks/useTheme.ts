@@ -1,14 +1,15 @@
 import { useEffect } from "react";
-import { TenantTheme } from "@/types/tenant";
+import { TenantConfig } from "@/types/tenant";
 
 /**
- * Apply dynamic theme by updating CSS variables
+ * Apply dynamic theme and layout by updating CSS variables
  */
-export const useTheme = (theme: TenantTheme | null) => {
+export const useTheme = (tenant: TenantConfig | null) => {
   useEffect(() => {
-    if (!theme) return;
+    if (!tenant) return;
 
     const root = document.documentElement;
+    const { theme, layout } = tenant;
 
     // Apply color variables
     root.style.setProperty('--primary', theme.primary);
@@ -26,6 +27,12 @@ export const useTheme = (theme: TenantTheme | null) => {
     root.style.setProperty('--font-display', theme.fontDisplay);
     root.style.setProperty('--font-body', theme.fontBody);
 
+    // Apply layout variables
+    if (layout) {
+      root.style.setProperty('--radius', layout.cardBorderRadius);
+      root.style.setProperty('--button-radius', layout.buttonBorderRadius);
+    }
+
     // Update favicon if provided
     if (theme.faviconUrl) {
       let link = document.querySelector<HTMLLinkElement>("link[rel~='icon']");
@@ -36,5 +43,5 @@ export const useTheme = (theme: TenantTheme | null) => {
       }
       link.href = theme.faviconUrl;
     }
-  }, [theme]);
+  }, [tenant]);
 };

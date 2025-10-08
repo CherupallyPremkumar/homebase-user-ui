@@ -1,6 +1,6 @@
 import { TenantConfig } from "@/types/tenant";
 
-// Tenant configurations with their themes
+// Tenant configurations with their themes and layouts
 export const TENANTS: Record<string, TenantConfig> = {
   havenhome: {
     id: "havenhome",
@@ -24,6 +24,12 @@ export const TENANTS: Record<string, TenantConfig> = {
       mutedForeground: "25 15% 45%",
       fontDisplay: "Playfair Display, serif",
       fontBody: "Inter, sans-serif",
+    },
+    layout: {
+      productLayout: "grid",
+      headerStyle: "classic",
+      cardBorderRadius: "0.875rem",
+      buttonBorderRadius: "0.5rem",
     },
   },
   
@@ -50,6 +56,12 @@ export const TENANTS: Record<string, TenantConfig> = {
       fontDisplay: "Montserrat, sans-serif",
       fontBody: "Open Sans, sans-serif",
     },
+    layout: {
+      productLayout: "list",
+      headerStyle: "modern",
+      cardBorderRadius: "0.25rem",
+      buttonBorderRadius: "0.25rem",
+    },
   },
   
   rusticcharm: {
@@ -74,6 +86,12 @@ export const TENANTS: Record<string, TenantConfig> = {
       mutedForeground: "25 20% 45%",
       fontDisplay: "Merriweather, serif",
       fontBody: "Lato, sans-serif",
+    },
+    layout: {
+      productLayout: "masonry",
+      headerStyle: "minimal",
+      cardBorderRadius: "1rem",
+      buttonBorderRadius: "0.75rem",
     },
   },
 };

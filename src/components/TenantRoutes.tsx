@@ -13,8 +13,8 @@ interface TenantRoutesProps {
 export const TenantRoutes = ({ children }: TenantRoutesProps) => {
   const { tenant, isLoading } = useTenant();
   
-  // Apply tenant theme
-  useTheme(tenant?.theme || null);
+  // Apply tenant theme and layout
+  useTheme(tenant);
 
   if (isLoading) {
     return (
