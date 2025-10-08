@@ -155,18 +155,25 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Products Grid */}
+        {/* Products Display */}
         {loading ? (
           <div className="flex justify-center items-center py-20">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-5">
+          <div className={
+            tenant?.layout?.productLayout === "list"
+              ? "space-y-4"
+              : tenant?.layout?.productLayout === "masonry"
+              ? "columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4"
+              : "grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-5"
+          }>
             {products.map((product) => (
               <ProductCard
                 key={product.id}
                 product={product}
                 onAddToCart={handleAddToCart}
+                layout={tenant?.layout?.productLayout || "grid"}
               />
             ))}
           </div>
