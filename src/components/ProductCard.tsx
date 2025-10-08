@@ -17,7 +17,7 @@ export const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
   const isLowStock = product.stock > 0 && product.stock <= 5;
 
   return (
-    <Card className="overflow-hidden hover-lift group">
+    <Card className="overflow-hidden hover-lift group h-full flex flex-col">
       <Link to={buildRoute(`/product/${product.id}`)}>
         <div className="aspect-square overflow-hidden bg-muted">
           <img
@@ -28,21 +28,21 @@ export const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
         </div>
       </Link>
       
-      <div className="p-4 space-y-3">
-        <div className="space-y-1">
+      <div className="p-3 sm:p-4 space-y-2 sm:space-y-3 flex-1 flex flex-col">
+        <div className="space-y-1 flex-1">
           <Link to={buildRoute(`/product/${product.id}`)}>
-            <h3 className="font-display font-semibold text-lg text-foreground hover:text-primary transition-base line-clamp-1">
+            <h3 className="font-display font-semibold text-sm sm:text-base text-foreground hover:text-primary transition-base line-clamp-2">
               {product.name}
             </h3>
           </Link>
-          <p className="text-sm text-muted-foreground line-clamp-2">
+          <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 hidden sm:block">
             {product.description}
           </p>
         </div>
 
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
           <div className="space-y-1">
-            <p className="text-xl font-display font-bold text-primary">
+            <p className="text-base sm:text-lg font-display font-bold text-primary">
               ₹{(product.price / 100).toFixed(2)}
             </p>
             {isLowStock && !isOutOfStock && (
@@ -59,10 +59,10 @@ export const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
               onAddToCart?.(product.id);
             }}
             disabled={isOutOfStock}
-            className="gap-2"
+            className="gap-1 sm:gap-2 text-xs sm:text-sm w-full sm:w-auto"
           >
-            <ShoppingCart className="h-4 w-4" />
-            {isOutOfStock ? "Out of Stock" : "Add"}
+            <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4" />
+            {isOutOfStock ? "Out" : "Add"}
           </Button>
         </div>
       </div>
