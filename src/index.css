@@ -9,86 +9,101 @@ All colors MUST be HSL.
 @layer base {
   :root {
     /* Default theme - will be overridden by tenant theme */
-    /* Warm earth tone palette for home decor */
-    --background: 45 35% 96%;
-    --foreground: 25 20% 20%;
+    /* Rich warm earth tone palette for home decor */
+    --background: 42 30% 97%;
+    --foreground: 25 25% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 25 20% 20%;
+    --card-foreground: 25 25% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 25 20% 20%;
+    --popover-foreground: 25 25% 15%;
 
-    /* Terracotta primary */
-    --primary: 15 65% 55%;
+    /* Rich Terracotta primary */
+    --primary: 15 75% 52%;
     --primary-foreground: 0 0% 100%;
+    --primary-hover: 15 75% 45%;
 
-    /* Sage green secondary */
-    --secondary: 140 22% 48%;
+    /* Deep Sage green secondary */
+    --secondary: 140 35% 42%;
     --secondary-foreground: 0 0% 100%;
 
-    /* Cream muted */
-    --muted: 45 40% 92%;
-    --muted-foreground: 25 15% 45%;
+    /* Warm cream muted */
+    --muted: 42 35% 94%;
+    --muted-foreground: 25 20% 40%;
 
-    /* Warm accent */
-    --accent: 35 60% 88%;
-    --accent-foreground: 25 20% 20%;
+    /* Rich warm accent */
+    --accent: 32 70% 85%;
+    --accent-foreground: 25 25% 15%;
 
-    --destructive: 0 70% 50%;
+    --destructive: 0 75% 48%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 45 25% 88%;
-    --input: 45 25% 88%;
-    --ring: 15 65% 55%;
+    --border: 42 20% 88%;
+    --input: 42 20% 90%;
+    --ring: 15 75% 52%;
 
-    --radius: 0.75rem;
+    --radius: 0.875rem;
 
     /* Custom design tokens */
-    --success: 140 60% 45%;
-    --warning: 35 90% 55%;
+    --success: 140 65% 42%;
+    --warning: 38 95% 58%;
     
     /* Font families - dynamically updated by tenant theme */
     --font-display: 'Playfair Display', serif;
     --font-body: 'Inter', sans-serif;
     
-    /* Shadows */
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    /* Enhanced shadows */
+    --shadow-sm: 0 2px 4px 0 rgb(0 0 0 / 0.06);
+    --shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.12);
+    --shadow-lg: 0 12px 24px -4px rgb(0 0 0 / 0.15);
+    --shadow-xl: 0 20px 40px -8px rgb(0 0 0 / 0.18);
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(15 75% 52%) 0%, hsl(15 75% 58%) 100%);
+    --gradient-secondary: linear-gradient(135deg, hsl(140 35% 42%) 0%, hsl(140 35% 48%) 100%);
+    --gradient-warm: linear-gradient(180deg, hsl(42 30% 97%) 0%, hsl(42 35% 94%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(42 35% 99%) 100%);
     
     /* Transitions */
     --transition-base: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 
   .dark {
-    --background: 25 20% 12%;
-    --foreground: 45 30% 95%;
+    --background: 25 25% 10%;
+    --foreground: 42 30% 96%;
 
-    --card: 25 20% 15%;
-    --card-foreground: 45 30% 95%;
+    --card: 25 20% 14%;
+    --card-foreground: 42 30% 96%;
 
-    --popover: 25 20% 15%;
-    --popover-foreground: 45 30% 95%;
+    --popover: 25 20% 14%;
+    --popover-foreground: 42 30% 96%;
 
-    --primary: 15 65% 55%;
+    --primary: 15 75% 55%;
     --primary-foreground: 0 0% 100%;
+    --primary-hover: 15 75% 48%;
 
-    --secondary: 140 22% 48%;
+    --secondary: 140 35% 48%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 25 15% 22%;
-    --muted-foreground: 45 20% 65%;
+    --muted: 25 18% 20%;
+    --muted-foreground: 42 25% 68%;
 
-    --accent: 25 18% 25%;
-    --accent-foreground: 45 30% 95%;
+    --accent: 25 22% 22%;
+    --accent-foreground: 42 30% 96%;
 
-    --destructive: 0 70% 50%;
+    --destructive: 0 75% 52%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 25 15% 25%;
-    --input: 25 15% 25%;
-    --ring: 15 65% 55%;
+    --border: 25 18% 24%;
+    --input: 25 18% 24%;
+    --ring: 15 75% 55%;
+    
+    --shadow-sm: 0 2px 4px 0 rgb(0 0 0 / 0.3);
+    --shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.4);
+    --shadow-lg: 0 12px 24px -4px rgb(0 0 0 / 0.5);
+    --shadow-xl: 0 20px 40px -8px rgb(0 0 0 / 0.6);
   }
 }
 
@@ -111,11 +126,42 @@ All colors MUST be HSL.
     transition: var(--transition-base);
   }
   
+  .transition-smooth {
+    transition: var(--transition-smooth);
+  }
+  
   .shadow-elegant {
-    box-shadow: 0 10px 30px -10px hsl(var(--primary) / 0.15);
+    box-shadow: 0 12px 32px -8px hsl(var(--primary) / 0.25);
+  }
+  
+  .shadow-glow {
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.15), 0 8px 24px -4px hsl(var(--primary) / 0.2);
   }
   
   .hover-lift {
-    @apply transition-base hover:-translate-y-1 hover:shadow-elegant;
+    @apply transition-smooth hover:-translate-y-2 hover:shadow-glow;
+  }
+  
+  .gradient-primary {
+    background: var(--gradient-primary);
+  }
+  
+  .gradient-secondary {
+    background: var(--gradient-secondary);
+  }
+  
+  .gradient-warm {
+    background: var(--gradient-warm);
+  }
+  
+  .gradient-card {
+    background: var(--gradient-card);
+  }
+  
+  .text-gradient {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 }

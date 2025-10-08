@@ -17,14 +17,15 @@ export const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
   const isLowStock = product.stock > 0 && product.stock <= 5;
 
   return (
-    <Card className="overflow-hidden hover-lift group h-full flex flex-col">
+    <Card className="overflow-hidden hover-lift group h-full flex flex-col gradient-card">
       <Link to={buildRoute(`/product/${product.id}`)}>
-        <div className="aspect-square overflow-hidden bg-muted">
+        <div className="aspect-square overflow-hidden bg-muted relative">
           <img
             src={product.imageUrl}
             alt={product.name}
-            className="h-full w-full object-cover transition-base group-hover:scale-105"
+            className="h-full w-full object-cover transition-smooth group-hover:scale-110"
           />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-smooth" />
         </div>
       </Link>
       
