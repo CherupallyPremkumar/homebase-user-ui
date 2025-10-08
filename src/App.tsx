@@ -14,6 +14,7 @@ import Checkout from "./pages/Checkout";
 import OrderConfirmation from "./pages/OrderConfirmation";
 import PaymentFailed from "./pages/PaymentFailed";
 import MyOrders from "./pages/MyOrders";
+import Profile from "./pages/Profile";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
@@ -48,6 +49,8 @@ const App = () => (
                 <Route path="/:tenant/payment-failed" element={<ProtectedRoute><PaymentFailed /></ProtectedRoute>} />
                 <Route path="/orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
                 <Route path="/:tenant/orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
+                <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+                <Route path="/:tenant/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                 
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
