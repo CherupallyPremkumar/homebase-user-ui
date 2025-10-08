@@ -1,8 +1,17 @@
 import { Link } from "react-router-dom";
-import { ShoppingCart, Package } from "lucide-react";
+import { ShoppingCart, Package, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useTenant } from "@/hooks/useTenant";
+import { useAuth } from "@/hooks/useAuth";
 
 interface HeaderProps {
   cartItemCount?: number;
@@ -10,6 +19,7 @@ interface HeaderProps {
 
 export const Header = ({ cartItemCount = 0 }: HeaderProps) => {
   const { tenant, buildRoute } = useTenant();
+  const { user, logout } = useAuth();
 
   if (!tenant) return null;
 
@@ -47,7 +57,7 @@ export const Header = ({ cartItemCount = 0 }: HeaderProps) => {
             </Link>
           </nav>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3 sm:space-x-4">
             <Link to={buildRoute("/cart")}>
               <Button variant="outline" size="icon" className="relative hover:shadow-md">
                 <ShoppingCart className="h-5 w-5" />
@@ -60,6 +70,29 @@ export const Header = ({ cartItemCount = 0 }: HeaderProps) => {
                 )}
               </Button>
             </Link>
+
+            {user && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="icon" className="hover:shadow-md">
+                    <User className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-semibold">{user.name}</p>
+                      <p className="text-xs text-muted-foreground">{user.email}</p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={logout} className="cursor-pointer">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
         </div>
       </div>

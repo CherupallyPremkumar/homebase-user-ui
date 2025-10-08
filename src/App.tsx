@@ -4,7 +4,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { TenantProvider } from "@/contexts/TenantContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 import { TenantRoutes } from "@/components/TenantRoutes";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Home from "./pages/Home";
 import ProductDetails from "./pages/ProductDetails";
 import Cart from "./pages/Cart";
@@ -12,6 +14,7 @@ import Checkout from "./pages/Checkout";
 import OrderConfirmation from "./pages/OrderConfirmation";
 import PaymentFailed from "./pages/PaymentFailed";
 import MyOrders from "./pages/MyOrders";
+import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,27 +26,34 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <TenantProvider>
-          <TenantRoutes>
-            <Routes>
-              {/* Tenant-aware routes - support both /route and /tenant/route */}
-              <Route path="/" element={<Home />} />
-              <Route path="/:tenant" element={<Home />} />
-              <Route path="/product/:id" element={<ProductDetails />} />
-              <Route path="/:tenant/product/:id" element={<ProductDetails />} />
-              <Route path="/cart" element={<Cart />} />
-              <Route path="/:tenant/cart" element={<Cart />} />
-              <Route path="/checkout" element={<Checkout />} />
-              <Route path="/:tenant/checkout" element={<Checkout />} />
-              <Route path="/order/:orderId" element={<OrderConfirmation />} />
-              <Route path="/:tenant/order/:orderId" element={<OrderConfirmation />} />
-              <Route path="/payment-failed" element={<PaymentFailed />} />
-              <Route path="/:tenant/payment-failed" element={<PaymentFailed />} />
-              <Route path="/orders" element={<MyOrders />} />
-              <Route path="/:tenant/orders" element={<MyOrders />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </TenantRoutes>
+          <AuthProvider>
+            <TenantRoutes>
+              <Routes>
+                {/* Public routes */}
+                <Route path="/login" element={<Login />} />
+                <Route path="/:tenant/login" element={<Login />} />
+                
+                {/* Protected tenant-aware routes */}
+                <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+                <Route path="/:tenant" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+                <Route path="/product/:id" element={<ProtectedRoute><ProductDetails /></ProtectedRoute>} />
+                <Route path="/:tenant/product/:id" element={<ProtectedRoute><ProductDetails /></ProtectedRoute>} />
+                <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
+                <Route path="/:tenant/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
+                <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+                <Route path="/:tenant/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+                <Route path="/order/:orderId" element={<ProtectedRoute><OrderConfirmation /></ProtectedRoute>} />
+                <Route path="/:tenant/order/:orderId" element={<ProtectedRoute><OrderConfirmation /></ProtectedRoute>} />
+                <Route path="/payment-failed" element={<ProtectedRoute><PaymentFailed /></ProtectedRoute>} />
+                <Route path="/:tenant/payment-failed" element={<ProtectedRoute><PaymentFailed /></ProtectedRoute>} />
+                <Route path="/orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
+                <Route path="/:tenant/orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
+                
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </TenantRoutes>
+          </AuthProvider>
         </TenantProvider>
       </BrowserRouter>
     </TooltipProvider>
