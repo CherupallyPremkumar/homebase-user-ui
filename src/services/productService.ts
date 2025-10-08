@@ -1,0 +1,115 @@
+import { ProductDto } from "@/types/dto";
+import productVase from "@/assets/product-vase.jpg";
+import productWallHanging from "@/assets/product-wall-hanging.jpg";
+import productPlanters from "@/assets/product-planters.jpg";
+import productCushion from "@/assets/product-cushion.jpg";
+import productCandlesticks from "@/assets/product-candlesticks.jpg";
+import productBasket from "@/assets/product-basket.jpg";
+
+// TODO: Replace with actual backend API endpoint
+const API_BASE_URL = "/api";
+
+// Mock data for development
+const mockProducts: ProductDto[] = [
+  {
+    id: 1,
+    name: "Ceramic Vase Collection",
+    description: "Handcrafted ceramic vases with organic shapes and earthy glazes. Perfect for fresh or dried flowers.",
+    price: 3499,
+    imageUrl: productVase,
+    category: "Decor",
+    stock: 15,
+  },
+  {
+    id: 2,
+    name: "Woven Wall Hanging",
+    description: "Macramé wall art featuring natural cotton rope in a modern geometric design.",
+    price: 2799,
+    imageUrl: productWallHanging,
+    category: "Wall Art",
+    stock: 8,
+  },
+  {
+    id: 3,
+    name: "Terracotta Plant Pot Set",
+    description: "Set of 3 terracotta pots with drainage holes and matching saucers.",
+    price: 1999,
+    imageUrl: productPlanters,
+    category: "Planters",
+    stock: 25,
+  },
+  {
+    id: 4,
+    name: "Velvet Cushion Cover",
+    description: "Luxurious sage green velvet cushion cover with hidden zipper closure.",
+    price: 1299,
+    imageUrl: productCushion,
+    category: "Textiles",
+    stock: 30,
+  },
+  {
+    id: 5,
+    name: "Brass Candlestick Holders",
+    description: "Pair of vintage-inspired brass candlestick holders with antique finish.",
+    price: 2499,
+    imageUrl: productCandlesticks,
+    category: "Decor",
+    stock: 12,
+  },
+  {
+    id: 6,
+    name: "Rattan Storage Basket",
+    description: "Handwoven rattan basket with handles, perfect for storage or display.",
+    price: 3299,
+    imageUrl: productBasket,
+    category: "Storage",
+    stock: 10,
+  },
+];
+
+export const productService = {
+  // GET /api/products
+  getAllProducts: async (): Promise<ProductDto[]> => {
+    // TODO: Implement actual API call to Spring Boot backend
+    // const response = await fetch(`${API_BASE_URL}/products`);
+    // if (!response.ok) throw new Error('Failed to fetch products');
+    // return response.json();
+    
+    // Mock implementation
+    return new Promise((resolve) => {
+      setTimeout(() => resolve(mockProducts), 500);
+    });
+  },
+
+  // GET /api/products/{id}
+  getProductById: async (id: number): Promise<ProductDto | null> => {
+    // TODO: Implement actual API call to Spring Boot backend
+    // const response = await fetch(`${API_BASE_URL}/products/${id}`);
+    // if (!response.ok) throw new Error('Failed to fetch product');
+    // return response.json();
+    
+    // Mock implementation
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const product = mockProducts.find(p => p.id === id);
+        resolve(product || null);
+      }, 300);
+    });
+  },
+
+  // GET /api/products?category={category}
+  getProductsByCategory: async (category: string): Promise<ProductDto[]> => {
+    // TODO: Implement actual API call to Spring Boot backend
+    // const response = await fetch(`${API_BASE_URL}/products?category=${category}`);
+    // if (!response.ok) throw new Error('Failed to fetch products');
+    // return response.json();
+    
+    // Mock implementation
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const filtered = mockProducts.filter(p => p.category === category);
+        resolve(filtered);
+      }, 400);
+    });
+  },
+};
