@@ -8,102 +8,103 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Default theme - will be overridden by tenant theme */
-    /* Rich warm earth tone palette for home decor */
-    --background: 42 30% 97%;
-    --foreground: 25 25% 15%;
+    /* Modern Light Design System v2.0 */
+    /* Clean, professional color palette */
+    --background: 0 0% 98%;
+    --foreground: 220 13% 18%;
 
     --card: 0 0% 100%;
-    --card-foreground: 25 25% 15%;
+    --card-foreground: 220 13% 18%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 25 25% 15%;
+    --popover-foreground: 220 13% 18%;
 
-    /* Rich Terracotta primary */
-    --primary: 15 75% 52%;
+    /* Primary - Teal */
+    --primary: 174 62% 47%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 15 75% 45%;
+    --primary-hover: 174 62% 40%;
 
-    /* Deep Sage green secondary */
-    --secondary: 140 35% 42%;
-    --secondary-foreground: 0 0% 100%;
+    /* Secondary - Subtle Gray */
+    --secondary: 220 13% 95%;
+    --secondary-foreground: 220 13% 18%;
 
-    /* Warm cream muted */
-    --muted: 42 35% 94%;
-    --muted-foreground: 25 20% 40%;
+    /* Muted */
+    --muted: 220 13% 95%;
+    --muted-foreground: 220 13% 45%;
 
-    /* Rich warm accent */
-    --accent: 32 70% 85%;
-    --accent-foreground: 25 25% 15%;
+    /* Accent - Blue */
+    --accent: 217 91% 60%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 75% 48%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 42 20% 88%;
-    --input: 42 20% 90%;
-    --ring: 15 75% 52%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 174 62% 47%;
 
-    --radius: 0.875rem;
+    --radius: 0.5rem;
 
     /* Custom design tokens */
     --success: 140 65% 42%;
     --warning: 38 95% 58%;
     
-    /* Font families - dynamically updated by tenant theme */
-    --font-display: 'Playfair Display', serif;
+    /* Font families - Inter for body, JetBrains Mono for numbers/code */
+    --font-display: 'Inter', sans-serif;
     --font-body: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
     
-    /* Enhanced shadows */
-    --shadow-sm: 0 2px 4px 0 rgb(0 0 0 / 0.06);
-    --shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.12);
-    --shadow-lg: 0 12px 24px -4px rgb(0 0 0 / 0.15);
-    --shadow-xl: 0 20px 40px -8px rgb(0 0 0 / 0.18);
+    /* Modern minimal shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(220 13% 18% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(220 13% 18% / 0.1);
+    --shadow-lg: 0 10px 15px -3px hsl(220 13% 18% / 0.1);
+    --shadow-xl: 0 20px 25px -5px hsl(220 13% 18% / 0.1);
     
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(15 75% 52%) 0%, hsl(15 75% 58%) 100%);
-    --gradient-secondary: linear-gradient(135deg, hsl(140 35% 42%) 0%, hsl(140 35% 48%) 100%);
-    --gradient-warm: linear-gradient(180deg, hsl(42 30% 97%) 0%, hsl(42 35% 94%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(42 35% 99%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(174 62% 47%) 0%, hsl(174 62% 40%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(217 91% 50%) 100%);
+    --gradient-subtle: linear-gradient(180deg, hsl(0 0% 98%) 0%, hsl(0 0% 100%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(0 0% 99%) 100%);
     
     /* Transitions */
-    --transition-base: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-smooth: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --transition-base: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .dark {
-    --background: 25 25% 10%;
-    --foreground: 42 30% 96%;
+    --background: 220 13% 10%;
+    --foreground: 0 0% 98%;
 
-    --card: 25 20% 14%;
-    --card-foreground: 42 30% 96%;
+    --card: 220 13% 14%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 25 20% 14%;
-    --popover-foreground: 42 30% 96%;
+    --popover: 220 13% 14%;
+    --popover-foreground: 0 0% 98%;
 
-    --primary: 15 75% 55%;
+    --primary: 174 62% 50%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 15 75% 48%;
+    --primary-hover: 174 62% 43%;
 
-    --secondary: 140 35% 48%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 220 13% 20%;
+    --secondary-foreground: 0 0% 98%;
 
-    --muted: 25 18% 20%;
-    --muted-foreground: 42 25% 68%;
+    --muted: 220 13% 20%;
+    --muted-foreground: 220 13% 68%;
 
-    --accent: 25 22% 22%;
-    --accent-foreground: 42 30% 96%;
+    --accent: 217 91% 55%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 75% 52%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 25 18% 24%;
-    --input: 25 18% 24%;
-    --ring: 15 75% 55%;
+    --border: 220 13% 24%;
+    --input: 220 13% 24%;
+    --ring: 174 62% 50%;
     
-    --shadow-sm: 0 2px 4px 0 rgb(0 0 0 / 0.3);
-    --shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.4);
-    --shadow-lg: 0 12px 24px -4px rgb(0 0 0 / 0.5);
-    --shadow-xl: 0 20px 40px -8px rgb(0 0 0 / 0.6);
+    --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.2);
+    --shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.3);
+    --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.4);
+    --shadow-xl: 0 20px 25px -5px hsl(0 0% 0% / 0.5);
   }
 }
 
@@ -131,27 +132,27 @@ All colors MUST be HSL.
   }
   
   .shadow-elegant {
-    box-shadow: 0 12px 32px -8px hsl(var(--primary) / 0.25);
+    box-shadow: 0 10px 25px -5px hsl(var(--primary) / 0.2);
   }
   
   .shadow-glow {
-    box-shadow: 0 0 20px hsl(var(--primary) / 0.15), 0 8px 24px -4px hsl(var(--primary) / 0.2);
+    box-shadow: 0 0 15px hsl(var(--primary) / 0.1), 0 5px 15px -3px hsl(var(--primary) / 0.15);
   }
   
   .hover-lift {
-    @apply transition-smooth hover:-translate-y-2 hover:shadow-glow;
+    @apply transition-smooth hover:-translate-y-1 hover:shadow-elegant;
   }
   
   .gradient-primary {
     background: var(--gradient-primary);
   }
   
-  .gradient-secondary {
-    background: var(--gradient-secondary);
+  .gradient-accent {
+    background: var(--gradient-accent);
   }
   
-  .gradient-warm {
-    background: var(--gradient-warm);
+  .gradient-subtle {
+    background: var(--gradient-subtle);
   }
   
   .gradient-card {
@@ -163,5 +164,10 @@ All colors MUST be HSL.
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  }
+  
+  /* Modern tap targets for mobile */
+  .tap-target {
+    @apply min-h-[44px] min-w-[44px];
   }
 }

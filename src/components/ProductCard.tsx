@@ -21,7 +21,7 @@ export const ProductCard = ({ product, onAddToCart, layout = "grid" }: ProductCa
   // List layout - horizontal card
   if (layout === "list") {
     return (
-      <Card className="overflow-hidden hover-lift group gradient-card">
+      <Card className="overflow-hidden hover-lift group bg-card border-border shadow-sm">
         <div className="flex flex-col sm:flex-row gap-4">
           <Link to={buildRoute(`/product/${product.id}`)} className="flex-shrink-0">
             <div className="w-full sm:w-48 h-48 overflow-hidden bg-muted relative">
@@ -86,7 +86,7 @@ export const ProductCard = ({ product, onAddToCart, layout = "grid" }: ProductCa
   // Masonry layout - varied height cards
   if (layout === "masonry") {
     return (
-      <Card className="overflow-hidden hover-lift group break-inside-avoid mb-4 gradient-card">
+      <Card className="overflow-hidden hover-lift group break-inside-avoid mb-4 bg-card border-border shadow-sm">
         <Link to={buildRoute(`/product/${product.id}`)}>
           <div className="w-full overflow-hidden bg-muted relative" style={{ aspectRatio: Math.random() > 0.5 ? '3/4' : '4/3' }}>
             <img
@@ -148,7 +148,7 @@ export const ProductCard = ({ product, onAddToCart, layout = "grid" }: ProductCa
 
   // Default grid layout - compact card
   return (
-    <Card className="overflow-hidden hover-lift group h-full flex flex-col gradient-card">
+    <Card className="overflow-hidden hover-lift group h-full flex flex-col bg-card border-border shadow-sm">
       <Link to={buildRoute(`/product/${product.id}`)}>
         <div className="aspect-square overflow-hidden bg-muted relative">
           <img

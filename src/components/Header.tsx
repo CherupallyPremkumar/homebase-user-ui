@@ -24,7 +24,7 @@ export const Header = ({ cartItemCount = 0 }: HeaderProps) => {
   if (!tenant) return null;
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-md shadow-md supports-[backdrop-filter]:bg-background/70">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-card/95 backdrop-blur-sm supports-[backdrop-filter]:bg-card/90 shadow-sm">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 sm:h-18 items-center justify-between">
           <Link to={buildRoute("/")} className="flex items-center space-x-2 group">
