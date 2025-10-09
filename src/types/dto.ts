@@ -6,6 +6,7 @@ export interface ProductDto {
   description: string;
   price: number;
   imageUrl: string;
+  images?: string[]; // Multiple product images
   category: string;
   stock: number;
   rating?: number;

@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import { useTenant } from "@/hooks/useTenant";
 import { ShoppingCart, ArrowLeft, Loader2, Package } from "lucide-react";
+import { ProductImageCarousel } from "@/components/ProductImageCarousel";
+import { AnimatedRating } from "@/components/AnimatedRating";
 
 const ProductDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -112,14 +114,11 @@ const ProductDetails = () => {
         </Button>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Product Image */}
-          <div className="aspect-square overflow-hidden rounded-lg bg-muted">
-            <img
-              src={product.imageUrl}
-              alt={product.name}
-              className="h-full w-full object-cover"
-            />
-          </div>
+          {/* Product Images Carousel */}
+          <ProductImageCarousel
+            images={product.images && product.images.length > 0 ? product.images : [product.imageUrl]}
+            productName={product.name}
+          />
 
           {/* Product Info */}
           <div className="space-y-6">
@@ -130,9 +129,16 @@ const ProductDetails = () => {
               <h1 className="text-3xl sm:text-4xl font-display font-bold text-foreground mb-4">
                 {product.name}
               </h1>
-              <p className="text-3xl font-display font-bold text-primary">
+              <p className="text-3xl font-display font-bold text-primary mb-4">
                 ₹{(product.price / 100).toFixed(2)}
               </p>
+              
+              {/* Animated Rating */}
+              {product.rating && (
+                <div className="py-4 border-t border-border">
+                  <AnimatedRating rating={product.rating} />
+                </div>
+              )}
             </div>
 
             <div className="border-t border-b py-6">
