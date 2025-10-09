@@ -6,6 +6,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { ImageZoom } from "@/components/ImageZoom";
 import { cn } from "@/lib/utils";
 
 interface ProductImageCarouselProps {
@@ -18,12 +19,12 @@ export const ProductImageCarousel = ({ images, productName }: ProductImageCarous
 
   return (
     <div className="space-y-4">
-      {/* Main Image Display */}
+      {/* Main Image Display with Zoom */}
       <div className="aspect-square overflow-hidden rounded-lg bg-muted border border-border shadow-lg">
-        <img
+        <ImageZoom
           src={images[selectedIndex]}
           alt={`${productName} - Image ${selectedIndex + 1}`}
-          className="h-full w-full object-cover transition-smooth hover:scale-105"
+          className="aspect-square"
         />
       </div>
 

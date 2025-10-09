@@ -4,16 +4,17 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useTenant } from "@/hooks/useTenant";
-import { ShoppingCart, Star } from "lucide-react";
+import { ShoppingCart, Star, Eye } from "lucide-react";
 import { ProductLayoutType } from "@/types/tenant";
 
 interface ProductCardProps {
   product: ProductDto;
   onAddToCart?: (productId: number) => void;
+  onQuickView?: (product: ProductDto) => void;
   layout?: ProductLayoutType;
 }
 
-export const ProductCard = ({ product, onAddToCart, layout = "grid" }: ProductCardProps) => {
+export const ProductCard = ({ product, onAddToCart, onQuickView, layout = "grid" }: ProductCardProps) => {
   const { buildRoute } = useTenant();
   const isOutOfStock = product.stock === 0;
   const isLowStock = product.stock > 0 && product.stock <= 5;
@@ -149,7 +150,7 @@ export const ProductCard = ({ product, onAddToCart, layout = "grid" }: ProductCa
   // Default grid layout - compact card
   return (
     <Card className="overflow-hidden hover-lift group h-full flex flex-col bg-card border-border shadow-sm">
-      <Link to={buildRoute(`/product/${product.id}`)}>
+      <Link to={buildRoute(`/product/${product.id}`)} className="relative">
         <div className="aspect-square overflow-hidden bg-muted relative">
           <img
             src={product.imageUrl}
@@ -157,6 +158,22 @@ export const ProductCard = ({ product, onAddToCart, layout = "grid" }: ProductCa
             className="h-full w-full object-cover transition-smooth group-hover:scale-110"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-smooth" />
+          
+          {/* Quick View Button */}
+          {onQuickView && (
+            <Button
+              size="sm"
+              variant="secondary"
+              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-all gap-1 shadow-lg"
+              onClick={(e) => {
+                e.preventDefault();
+                onQuickView(product);
+              }}
+            >
+              <Eye className="h-3 w-3" />
+              <span className="hidden sm:inline">Quick View</span>
+            </Button>
+          )}
         </div>
       </Link>
       

@@ -114,11 +114,13 @@ const ProductDetails = () => {
         </Button>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Product Images Carousel */}
-          <ProductImageCarousel
-            images={product.images && product.images.length > 0 ? product.images : [product.imageUrl]}
-            productName={product.name}
-          />
+          {/* Product Images with Zoom */}
+          <div className="space-y-4">
+            <ProductImageCarousel
+              images={product.images && product.images.length > 0 ? product.images : [product.imageUrl]}
+              productName={product.name}
+            />
+          </div>
 
           {/* Product Info */}
           <div className="space-y-6">
