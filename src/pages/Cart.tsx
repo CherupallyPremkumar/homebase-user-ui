@@ -82,7 +82,7 @@ const Cart = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <Header cartItemCount={0} />
+        <Header cartItems={[]} />
         <div className="flex justify-center items-center py-20">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
@@ -93,7 +93,7 @@ const Cart = () => {
   if (cartItems.length === 0) {
     return (
       <div className="min-h-screen bg-background">
-        <Header cartItemCount={0} />
+        <Header cartItems={[]} />
         <div className="container mx-auto px-4 py-20 text-center">
           <ShoppingBag className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
           <h2 className="text-2xl font-display font-bold text-foreground mb-2">
@@ -112,7 +112,7 @@ const Cart = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header cartItemCount={cartItems.length} />
+      <Header cartItems={cartItems} />
 
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="text-3xl sm:text-4xl font-display font-bold text-foreground mb-8">

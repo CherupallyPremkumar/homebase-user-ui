@@ -7,6 +7,9 @@ import { useTenant } from "@/hooks/useTenant";
 import { ShoppingCart, Star, Eye } from "lucide-react";
 import { ProductLayoutType } from "@/types/tenant";
 import { ProductBadge, getProductBadges } from "@/components/ProductBadge";
+import { WishlistButton } from "@/components/WishlistButton";
+import { QuantitySelector } from "@/components/QuantitySelector";
+import { useState } from "react";
 
 interface ProductCardProps {
   product: ProductDto;
@@ -17,9 +20,20 @@ interface ProductCardProps {
 
 export const ProductCard = ({ product, onAddToCart, onQuickView, layout = "grid" }: ProductCardProps) => {
   const { buildRoute } = useTenant();
+  const [quantity, setQuantity] = useState(1);
   const isOutOfStock = product.stock === 0;
   const isLowStock = product.stock > 0 && product.stock <= 5;
   const badges = getProductBadges(product);
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (onAddToCart) {
+      for (let i = 0; i < quantity; i++) {
+        onAddToCart(product.id);
+      }
+      setQuantity(1); // Reset quantity after adding
+    }
+  };
 
   // List layout - horizontal card
   if (layout === "list") {
@@ -189,6 +203,14 @@ export const ProductCard = ({ product, onAddToCart, onQuickView, layout = "grid"
               <span className="hidden sm:inline">Quick View</span>
             </Button>
           )}
+          
+          {/* Wishlist Button */}
+          <WishlistButton
+            productId={product.id}
+            productName={product.name}
+            size="sm"
+            className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-all shadow-lg bg-background/95"
+          />
         </div>
       </Link>
       
@@ -210,8 +232,8 @@ export const ProductCard = ({ product, onAddToCart, onQuickView, layout = "grid"
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-          <div className="space-y-1">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
             <p className="text-base sm:text-lg font-display font-bold text-primary">
               ₹{(product.price / 100).toFixed(2)}
             </p>
@@ -222,17 +244,25 @@ export const ProductCard = ({ product, onAddToCart, onQuickView, layout = "grid"
             )}
           </div>
 
+          {/* Quantity Selector */}
+          {!isOutOfStock && (
+            <QuantitySelector
+              value={quantity}
+              max={product.stock}
+              onChange={setQuantity}
+              size="sm"
+              className="w-full"
+            />
+          )}
+
           <Button
             size="sm"
-            onClick={(e) => {
-              e.preventDefault();
-              onAddToCart?.(product.id);
-            }}
+            onClick={handleAddToCart}
             disabled={isOutOfStock}
-            className="gap-1 sm:gap-2 text-xs sm:text-sm w-full sm:w-auto"
+            className="gap-1 sm:gap-2 text-xs sm:text-sm w-full"
           >
             <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4" />
-            {isOutOfStock ? "Out" : "Add"}
+            {isOutOfStock ? "Out" : `Add ${quantity > 1 ? `(${quantity})` : ''}`}
           </Button>
         </div>
       </div>

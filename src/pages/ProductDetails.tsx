@@ -14,18 +14,26 @@ import { ProductImageCarousel } from "@/components/ProductImageCarousel";
 import { AnimatedRating } from "@/components/AnimatedRating";
 import { ProductReviews } from "@/components/ProductReviews";
 import { SocialShare } from "@/components/SocialShare";
+import { ProductRecommendations } from "@/components/ProductRecommendations";
+import { RecentlyViewed, addToRecentlyViewed } from "@/components/RecentlyViewed";
+import { WishlistButton } from "@/components/WishlistButton";
+import QuickViewModal from "@/components/QuickViewModal";
 
 const ProductDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { tenant, buildRoute } = useTenant();
   const [product, setProduct] = useState<ProductDto | null>(null);
+  const [allProducts, setAllProducts] = useState<ProductDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [cartItemCount, setCartItemCount] = useState(0);
+  const [selectedProduct, setSelectedProduct] = useState<ProductDto | null>(null);
+  const [quickViewOpen, setQuickViewOpen] = useState(false);
 
   useEffect(() => {
     if (id && tenant) {
       loadProduct(parseInt(id));
+      loadAllProducts();
       loadCartCount();
     }
   }, [id, tenant]);
@@ -34,6 +42,9 @@ const ProductDetails = () => {
     try {
       const data = await productService.getProductById(productId, tenant?.id);
       setProduct(data);
+      
+      // Add to recently viewed
+      addToRecentlyViewed(data);
     } catch (error) {
       toast({
         title: "Error",
@@ -42,6 +53,15 @@ const ProductDetails = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadAllProducts = async () => {
+    try {
+      const data = await productService.getAllProducts(tenant?.id);
+      setAllProducts(data);
+    } catch (error) {
+      console.error("Failed to load products", error);
     }
   };
 
@@ -73,10 +93,15 @@ const ProductDetails = () => {
     }
   };
 
+  const handleQuickView = (product: ProductDto) => {
+    setSelectedProduct(product);
+    setQuickViewOpen(true);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <Header cartItemCount={cartItemCount} />
+        <Header cartItems={[]} />
         <div className="flex justify-center items-center py-20">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
@@ -87,7 +112,7 @@ const ProductDetails = () => {
   if (!product) {
     return (
       <div className="min-h-screen bg-background">
-        <Header cartItemCount={cartItemCount} />
+        <Header cartItems={[]} />
         <div className="container mx-auto px-4 py-20 text-center">
           <p className="text-muted-foreground mb-4">Product not found</p>
           <Button onClick={() => navigate("/")}>
@@ -104,7 +129,7 @@ const ProductDetails = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header cartItemCount={cartItemCount} />
+      <Header cartItems={[]} />
 
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Button
@@ -179,6 +204,14 @@ const ProductDetails = () => {
                   {isOutOfStock ? "Out of Stock" : "Add to Cart"}
                 </Button>
                 
+                <WishlistButton
+                  productId={product.id}
+                  productName={product.name}
+                  size="lg"
+                  variant="outline"
+                  showLabel
+                />
+                
                 <SocialShare
                   title={product.name}
                   description={product.description}
@@ -205,7 +238,36 @@ const ProductDetails = () => {
         <div className="max-w-4xl mx-auto">
           <ProductReviews productId={product.id} productName={product.name} />
         </div>
+
+        {/* Recommendations Section */}
+        <Separator className="my-12" />
+        <ProductRecommendations
+          currentProduct={product}
+          allProducts={allProducts}
+          maxItems={4}
+          onAddToCart={handleAddToCart}
+          onQuickView={handleQuickView}
+        />
+
+        {/* Recently Viewed Section */}
+        <Separator className="my-12" />
+        <RecentlyViewed
+          currentProductId={product.id}
+          maxItems={4}
+          onAddToCart={handleAddToCart}
+          onQuickView={handleQuickView}
+        />
       </main>
+
+      {/* Quick View Modal */}
+      {selectedProduct && (
+        <QuickViewModal
+          product={selectedProduct}
+          open={quickViewOpen}
+          onOpenChange={setQuickViewOpen}
+          onAddToCart={handleAddToCart}
+        />
+      )}
     </div>
   );
 };

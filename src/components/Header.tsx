@@ -10,14 +10,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { MiniCart } from "@/components/MiniCart";
+import { CartItemDto } from "@/types/dto";
 import { useTenant } from "@/hooks/useTenant";
 import { useAuth } from "@/hooks/useAuth";
 
 interface HeaderProps {
-  cartItemCount?: number;
+  cartItems?: CartItemDto[];
+  onRemoveCartItem?: (itemId: number) => void;
+  onUpdateCartQuantity?: (itemId: number, quantity: number) => void;
 }
 
-export const Header = ({ cartItemCount = 0 }: HeaderProps) => {
+export const Header = ({ cartItems = [], onRemoveCartItem, onUpdateCartQuantity }: HeaderProps) => {
   const { tenant, buildRoute } = useTenant();
   const { user, logout } = useAuth();
 
@@ -58,18 +62,11 @@ export const Header = ({ cartItemCount = 0 }: HeaderProps) => {
           </nav>
 
           <div className="flex items-center space-x-3 sm:space-x-4">
-            <Link to={buildRoute("/cart")}>
-              <Button variant="outline" size="icon" className="relative hover:shadow-md">
-                <ShoppingCart className="h-5 w-5" />
-                {cartItemCount > 0 && (
-                  <Badge 
-                    className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 gradient-primary text-primary-foreground shadow-md"
-                  >
-                    {cartItemCount}
-                  </Badge>
-                )}
-              </Button>
-            </Link>
+            <MiniCart
+              items={cartItems}
+              onRemoveItem={onRemoveCartItem || (() => {})}
+              onUpdateQuantity={onUpdateCartQuantity || (() => {})}
+            />
 
             {user && (
               <DropdownMenu>

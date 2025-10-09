@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { ProductDto } from "@/types/dto";
+import { ProductDto, CartItemDto } from "@/types/dto";
 import { productService } from "@/services/productService";
 import { cartService } from "@/services/cartService";
 import { ProductCard } from "@/components/ProductCard";
 import { Header } from "@/components/Header";
-import { QuickViewModal } from "@/components/QuickViewModal";
+import QuickViewModal from "@/components/QuickViewModal";
 import { PriceRangeFilter } from "@/components/PriceRangeFilter";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
@@ -36,7 +36,7 @@ const Home = () => {
   const [allProducts, setAllProducts] = useState<ProductDto[]>([]);
   const [displayedProducts, setDisplayedProducts] = useState<ProductDto[]>([]);
   const [loading, setLoading] = useState(true);
-  const [cartItemCount, setCartItemCount] = useState(0);
+  const [cartItems, setCartItems] = useState<CartItemDto[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [sortOption, setSortOption] = useState<SortOption>("rating");
   const [searchQuery, setSearchQuery] = useState("");
@@ -180,16 +180,17 @@ const Home = () => {
   const loadCartCount = async () => {
     try {
       const cart = await cartService.getCart(tenant?.id);
-      setCartItemCount(cart.length);
+      setCartItems(cart);
     } catch (error) {
-      console.error("Failed to load cart count", error);
+      console.error("Failed to load cart", error);
     }
   };
 
   const handleAddToCart = async (productId: number) => {
     try {
       await cartService.addToCart(productId, 1, tenant?.id);
-      setCartItemCount((prev) => prev + 1);
+      const updatedCart = await cartService.getCart(tenant?.id);
+      setCartItems(updatedCart);
       toast({
         title: "Added to cart",
         description: "Product has been added to your cart",
@@ -203,6 +204,42 @@ const Home = () => {
     }
   };
 
+  const handleRemoveCartItem = async (itemId: number) => {
+    try {
+      await cartService.removeFromCart(itemId, tenant?.id);
+      const updatedCart = await cartService.getCart(tenant?.id);
+      setCartItems(updatedCart);
+      toast({
+        title: "Removed from cart",
+        description: "Item has been removed from your cart",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to remove item from cart",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleUpdateCartQuantity = async (itemId: number, quantity: number) => {
+    try {
+      if (quantity < 1) {
+        await handleRemoveCartItem(itemId);
+        return;
+      }
+      await cartService.updateCartItem(itemId, quantity, tenant?.id);
+      const updatedCart = await cartService.getCart(tenant?.id);
+      setCartItems(updatedCart);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update cart",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleQuickView = (product: ProductDto) => {
     setSelectedProduct(product);
     setQuickViewOpen(true);
@@ -210,7 +247,11 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header cartItemCount={cartItemCount} />
+      <Header
+        cartItems={cartItems}
+        onRemoveCartItem={handleRemoveCartItem}
+        onUpdateCartQuantity={handleUpdateCartQuantity}
+      />
 
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Search Bar */}

@@ -147,7 +147,7 @@ const Checkout = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <Header cartItemCount={0} />
+        <Header cartItems={[]} />
         <div className="flex justify-center items-center py-20">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
@@ -157,7 +157,7 @@ const Checkout = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header cartItemCount={cartItems.length} />
+      <Header cartItems={cartItems} />
 
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="text-3xl sm:text-4xl font-display font-bold text-foreground mb-8">

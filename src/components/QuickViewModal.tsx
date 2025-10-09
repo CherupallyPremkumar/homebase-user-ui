@@ -21,7 +21,7 @@ interface QuickViewModalProps {
   onAddToCart: (productId: number) => void;
 }
 
-export const QuickViewModal = ({
+const QuickViewModal = ({
   product,
   open,
   onOpenChange,
@@ -163,3 +163,5 @@ export const QuickViewModal = ({
     </Dialog>
   );
 };
+
+export default QuickViewModal;
