@@ -6,13 +6,15 @@ import { orderService } from "@/services/orderService";
 import { paymentService } from "@/services/paymentService";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { PaymentMethodSelector, type PaymentMethodType, paymentMethods } from "@/components/PaymentMethodSelector";
+import { ShippingCalculator } from "@/components/ShippingCalculator";
 import { toast } from "@/hooks/use-toast";
 import { useTenant } from "@/hooks/useTenant";
-import { Loader2, CreditCard } from "lucide-react";
+import { Loader2, ShoppingBag, CreditCard } from "lucide-react";
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -20,6 +22,8 @@ const Checkout = () => {
   const [cartItems, setCartItems] = useState<CartItemDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
+  const [shippingCost, setShippingCost] = useState(5000); // Default ₹50
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethodType>("card");
   const [formData, setFormData] = useState<CheckoutFormData>({
     customerName: "",
     customerEmail: "",
@@ -63,9 +67,15 @@ const Checkout = () => {
   };
 
   const subtotal = cartItems.reduce((sum, item) => sum + item.subtotal, 0);
-  const tax = Math.round(subtotal * 0.18);
-  const shipping = subtotal > 99900 ? 0 : 15000;
-  const total = subtotal + tax + shipping;
+  const tax = Math.round(subtotal * 0.18); // 18% GST
+  
+  // Get payment processing fee
+  const selectedPaymentMethod = paymentMethods.find(m => m.id === paymentMethod);
+  const processingFee = selectedPaymentMethod?.processingFee 
+    ? Math.round((subtotal + tax + shippingCost) * (selectedPaymentMethod.processingFee / 100))
+    : 0;
+  
+  const total = subtotal + tax + shippingCost + processingFee;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,7 +121,7 @@ const Checkout = () => {
         })),
         subtotal,
         tax,
-        shippingCost: shipping,
+        shippingCost: shippingCost,
         total,
       }, tenant?.id);
 
@@ -267,6 +277,18 @@ const Checkout = () => {
                   </div>
                 </div>
               </Card>
+
+              {/* Payment Method Selector */}
+              <PaymentMethodSelector
+                selected={paymentMethod}
+                onSelect={setPaymentMethod}
+              />
+
+              {/* Shipping Calculator */}
+              <ShippingCalculator
+                cartTotal={subtotal}
+                onShippingSelect={setShippingCost}
+              />
             </div>
 
             {/* Order Summary */}
@@ -317,9 +339,15 @@ const Checkout = () => {
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Shipping</span>
                     <span className="text-foreground">
-                      {shipping === 0 ? "FREE" : `₹${(shipping / 100).toFixed(2)}`}
+                      {shippingCost === 0 ? "FREE" : `₹${(shippingCost / 100).toFixed(2)}`}
                     </span>
                   </div>
+                  {processingFee > 0 && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Processing Fee</span>
+                      <span className="text-foreground">₹{(processingFee / 100).toFixed(2)}</span>
+                    </div>
+                  )}
                 </div>
 
                 <Separator />

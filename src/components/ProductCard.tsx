@@ -4,11 +4,13 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useTenant } from "@/hooks/useTenant";
-import { ShoppingCart, Star, Eye } from "lucide-react";
+import { ShoppingCart, Star, Eye, Package } from "lucide-react";
 import { ProductLayoutType } from "@/types/tenant";
 import { ProductBadge, getProductBadges } from "@/components/ProductBadge";
 import { WishlistButton } from "@/components/WishlistButton";
 import { QuantitySelector } from "@/components/QuantitySelector";
+import { CheckoutPreview } from "@/components/CheckoutPreview";
+import { ShippingBadge } from "@/components/ShippingCalculator";
 import { useState } from "react";
 
 interface ProductCardProps {
@@ -255,15 +257,32 @@ export const ProductCard = ({ product, onAddToCart, onQuickView, layout = "grid"
             />
           )}
 
-          <Button
-            size="sm"
-            onClick={handleAddToCart}
-            disabled={isOutOfStock}
-            className="gap-1 sm:gap-2 text-xs sm:text-sm w-full"
-          >
-            <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4" />
-            {isOutOfStock ? "Out" : `Add ${quantity > 1 ? `(${quantity})` : ''}`}
-          </Button>
+          {/* Shipping Badge */}
+          <ShippingBadge productPrice={product.price * quantity} />
+
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              onClick={handleAddToCart}
+              disabled={isOutOfStock}
+              className="flex-1 gap-1 sm:gap-2 text-xs sm:text-sm"
+            >
+              <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4" />
+              {isOutOfStock ? "Out" : `Add ${quantity > 1 ? `(${quantity})` : ''}`}
+            </Button>
+            
+            {!isOutOfStock && (
+              <CheckoutPreview
+                product={product}
+                quantity={quantity}
+                trigger={
+                  <Button size="sm" variant="outline" className="gap-1">
+                    <Package className="h-3 w-3" />
+                  </Button>
+                }
+              />
+            )}
+          </div>
         </div>
       </div>
     </Card>
