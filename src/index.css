@@ -48,6 +48,7 @@ All colors MUST be HSL.
     /* Custom design tokens */
     --success: 140 65% 42%;
     --warning: 38 95% 58%;
+    --warning-foreground: 0 0% 100%;
     
     /* Font families - Inter for body, JetBrains Mono for numbers/code */
     --font-display: 'Inter', sans-serif;

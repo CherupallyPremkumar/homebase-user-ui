@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { useTenant } from "@/hooks/useTenant";
 import { ShoppingCart, Star, Eye } from "lucide-react";
 import { ProductLayoutType } from "@/types/tenant";
+import { ProductBadge, getProductBadges } from "@/components/ProductBadge";
 
 interface ProductCardProps {
   product: ProductDto;
@@ -18,6 +19,7 @@ export const ProductCard = ({ product, onAddToCart, onQuickView, layout = "grid"
   const { buildRoute } = useTenant();
   const isOutOfStock = product.stock === 0;
   const isLowStock = product.stock > 0 && product.stock <= 5;
+  const badges = getProductBadges(product);
 
   // List layout - horizontal card
   if (layout === "list") {
@@ -158,6 +160,19 @@ export const ProductCard = ({ product, onAddToCart, onQuickView, layout = "grid"
             className="h-full w-full object-cover transition-smooth group-hover:scale-110"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-smooth" />
+          
+          {/* Badges */}
+          {badges.length > 0 && (
+            <div className="absolute top-2 left-2 flex flex-col gap-1">
+              {badges.map((badgeType, index) => (
+                <ProductBadge
+                  key={`${badgeType}-${index}`}
+                  type={badgeType}
+                  value={badgeType === "sale" ? product.discount : undefined}
+                />
+              ))}
+            </div>
+          )}
           
           {/* Quick View Button */}
           {onQuickView && (

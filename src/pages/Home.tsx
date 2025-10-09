@@ -6,6 +6,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { Header } from "@/components/Header";
 import { QuickViewModal } from "@/components/QuickViewModal";
 import { PriceRangeFilter } from "@/components/PriceRangeFilter";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import { useTenant } from "@/hooks/useTenant";
 import { Loader2, ArrowUpDown, Search, SlidersHorizontal } from "lucide-react";
@@ -33,6 +34,7 @@ const Home = () => {
   const { tenant } = useTenant();
   const [products, setProducts] = useState<ProductDto[]>([]);
   const [allProducts, setAllProducts] = useState<ProductDto[]>([]);
+  const [displayedProducts, setDisplayedProducts] = useState<ProductDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [cartItemCount, setCartItemCount] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
@@ -41,6 +43,9 @@ const Home = () => {
   const [priceRange, setPriceRange] = useState({ min: 0, max: 100000 });
   const [selectedProduct, setSelectedProduct] = useState<ProductDto | null>(null);
   const [quickViewOpen, setQuickViewOpen] = useState(false);
+  const [itemsToShow, setItemsToShow] = useState(12);
+  const [showInStock, setShowInStock] = useState(false);
+  const [showOnSale, setShowOnSale] = useState(false);
 
   useEffect(() => {
     if (tenant) {
@@ -73,7 +78,15 @@ const Home = () => {
     }
   };
 
-  const applyFiltersAndSorting = (category: string, sort: SortOption, search: string, minPrice: number, maxPrice: number) => {
+  const applyFiltersAndSorting = (
+    category: string,
+    sort: SortOption,
+    search: string,
+    minPrice: number,
+    maxPrice: number,
+    inStockOnly: boolean,
+    onSaleOnly: boolean
+  ) => {
     let filtered = [...allProducts];
 
     // Category filter
@@ -92,6 +105,16 @@ const Home = () => {
 
     // Price range filter
     filtered = filtered.filter(p => p.price >= minPrice && p.price <= maxPrice);
+
+    // Stock filter
+    if (inStockOnly) {
+      filtered = filtered.filter(p => p.stock > 0);
+    }
+
+    // Sale filter
+    if (onSaleOnly) {
+      filtered = filtered.filter(p => p.onSale || (p.discount && p.discount > 0));
+    }
 
     // Apply sorting
     filtered.sort((a, b) => {
@@ -112,25 +135,44 @@ const Home = () => {
     });
 
     setProducts(filtered);
+    setDisplayedProducts(filtered.slice(0, itemsToShow));
   };
 
   const handleCategoryFilter = (category: string) => {
     setSelectedCategory(category);
-    applyFiltersAndSorting(category, sortOption, searchQuery, priceRange.min, priceRange.max);
+    setItemsToShow(12);
+    applyFiltersAndSorting(category, sortOption, searchQuery, priceRange.min, priceRange.max, showInStock, showOnSale);
   };
 
   const handleSortChange = (sort: SortOption) => {
     setSortOption(sort);
-    applyFiltersAndSorting(selectedCategory, sort, searchQuery, priceRange.min, priceRange.max);
+    applyFiltersAndSorting(selectedCategory, sort, searchQuery, priceRange.min, priceRange.max, showInStock, showOnSale);
   };
 
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
-    applyFiltersAndSorting(selectedCategory, sortOption, value, priceRange.min, priceRange.max);
+    setItemsToShow(12);
+    applyFiltersAndSorting(selectedCategory, sortOption, value, priceRange.min, priceRange.max, showInStock, showOnSale);
   };
 
   const handlePriceRangeChange = (min: number, max: number) => {
-    applyFiltersAndSorting(selectedCategory, sortOption, searchQuery, min, max);
+    applyFiltersAndSorting(selectedCategory, sortOption, searchQuery, min, max, showInStock, showOnSale);
+  };
+
+  const handleStockFilterChange = (checked: boolean) => {
+    setShowInStock(checked);
+    applyFiltersAndSorting(selectedCategory, sortOption, searchQuery, priceRange.min, priceRange.max, checked, showOnSale);
+  };
+
+  const handleSaleFilterChange = (checked: boolean) => {
+    setShowOnSale(checked);
+    applyFiltersAndSorting(selectedCategory, sortOption, searchQuery, priceRange.min, priceRange.max, showInStock, checked);
+  };
+
+  const handleLoadMore = () => {
+    const newItemsToShow = itemsToShow + 12;
+    setItemsToShow(newItemsToShow);
+    setDisplayedProducts(products.slice(0, newItemsToShow));
   };
 
   const categories = ["All", ...Array.from(new Set(allProducts.map(p => p.category)))];
@@ -203,7 +245,7 @@ const Home = () => {
                     Refine your product search
                   </SheetDescription>
                 </SheetHeader>
-                <div className="mt-6">
+                <div className="mt-6 space-y-6">
                   <PriceRangeFilter
                     min={priceRange.min}
                     max={priceRange.max}
@@ -211,6 +253,36 @@ const Home = () => {
                     currentMax={priceRange.max}
                     onRangeChange={handlePriceRangeChange}
                   />
+                  
+                  <div className="space-y-3">
+                    <h4 className="font-semibold text-sm">Availability</h4>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="in-stock-mobile"
+                        checked={showInStock}
+                        onCheckedChange={handleStockFilterChange}
+                      />
+                      <label
+                        htmlFor="in-stock-mobile"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        In Stock Only
+                      </label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="on-sale-mobile"
+                        checked={showOnSale}
+                        onCheckedChange={handleSaleFilterChange}
+                      />
+                      <label
+                        htmlFor="on-sale-mobile"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        On Sale
+                      </label>
+                    </div>
+                  </div>
                 </div>
               </SheetContent>
             </Sheet>
@@ -234,7 +306,7 @@ const Home = () => {
           {/* Desktop Layout */}
           <div className="hidden lg:flex items-start gap-6">
             {/* Sidebar Filters */}
-            <div className="w-64 space-y-6 bg-card border border-border rounded-lg p-4 shadow-sm">
+            <div className="w-64 space-y-6 bg-card border border-border rounded-lg p-4 shadow-sm sticky top-20">
               <PriceRangeFilter
                 min={priceRange.min}
                 max={priceRange.max}
@@ -242,6 +314,36 @@ const Home = () => {
                 currentMax={priceRange.max}
                 onRangeChange={handlePriceRangeChange}
               />
+              
+              <div className="space-y-3 pt-4 border-t">
+                <h4 className="font-semibold text-sm">Availability</h4>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="in-stock"
+                    checked={showInStock}
+                    onCheckedChange={handleStockFilterChange}
+                  />
+                  <label
+                    htmlFor="in-stock"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                  >
+                    In Stock Only
+                  </label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="on-sale"
+                    checked={showOnSale}
+                    onCheckedChange={handleSaleFilterChange}
+                  />
+                  <label
+                    htmlFor="on-sale"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                  >
+                    On Sale
+                  </label>
+                </div>
+              </div>
             </div>
 
             {/* Main Content */}
@@ -285,28 +387,60 @@ const Home = () => {
                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 </div>
               ) : (
-                <div className={
-                  tenant?.layout?.productLayout === "list"
-                    ? "space-y-4"
-                    : tenant?.layout?.productLayout === "masonry"
-                    ? "columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4"
-                    : "grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-5"
-                }>
-                  {products.map((product) => (
-                    <ProductCard
-                      key={product.id}
-                      product={product}
-                      onAddToCart={handleAddToCart}
-                      onQuickView={handleQuickView}
-                      layout={tenant?.layout?.productLayout || "grid"}
-                    />
-                  ))}
-                </div>
+                <>
+                  <div className={
+                    tenant?.layout?.productLayout === "list"
+                      ? "space-y-4"
+                      : tenant?.layout?.productLayout === "masonry"
+                      ? "columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4"
+                      : "grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-5"
+                  }>
+                    {displayedProducts.map((product) => (
+                      <ProductCard
+                        key={product.id}
+                        product={product}
+                        onAddToCart={handleAddToCart}
+                        onQuickView={handleQuickView}
+                        layout={tenant?.layout?.productLayout || "grid"}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Load More Button */}
+                  {displayedProducts.length < products.length && (
+                    <div className="flex justify-center mt-8">
+                      <Button
+                        onClick={handleLoadMore}
+                        variant="outline"
+                        size="lg"
+                        className="gap-2"
+                      >
+                        Load More Products
+                        <span className="text-muted-foreground">
+                          ({displayedProducts.length} of {products.length})
+                        </span>
+                      </Button>
+                    </div>
+                  )}
+                </>
               )}
 
-              {products.length === 0 && !loading && (
+              {displayedProducts.length === 0 && !loading && (
                 <div className="text-center py-20">
-                  <p className="text-muted-foreground">No products available at the moment</p>
+                  <p className="text-muted-foreground">No products match your filters</p>
+                  <Button
+                    variant="link"
+                    onClick={() => {
+                      setSelectedCategory("All");
+                      setSearchQuery("");
+                      setShowInStock(false);
+                      setShowOnSale(false);
+                      applyFiltersAndSorting("All", sortOption, "", priceRange.min, priceRange.max, false, false);
+                    }}
+                    className="mt-2"
+                  >
+                    Clear all filters
+                  </Button>
                 </div>
               )}
             </div>
@@ -336,28 +470,47 @@ const Home = () => {
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : (
-            <div className={
-              tenant?.layout?.productLayout === "list"
-                ? "space-y-4"
-                : tenant?.layout?.productLayout === "masonry"
-                ? "columns-1 sm:columns-2 gap-4 space-y-4"
-                : "grid grid-cols-2 gap-3 sm:gap-4"
-            }>
-              {products.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  onAddToCart={handleAddToCart}
-                  onQuickView={handleQuickView}
-                  layout={tenant?.layout?.productLayout || "grid"}
-                />
-              ))}
-            </div>
+            <>
+              <div className={
+                tenant?.layout?.productLayout === "list"
+                  ? "space-y-4"
+                  : tenant?.layout?.productLayout === "masonry"
+                  ? "columns-1 sm:columns-2 gap-4 space-y-4"
+                  : "grid grid-cols-2 gap-3 sm:gap-4"
+              }>
+                {displayedProducts.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    onAddToCart={handleAddToCart}
+                    onQuickView={handleQuickView}
+                    layout={tenant?.layout?.productLayout || "grid"}
+                  />
+                ))}
+              </div>
+
+              {/* Load More Button */}
+              {displayedProducts.length < products.length && (
+                <div className="flex justify-center mt-8">
+                  <Button
+                    onClick={handleLoadMore}
+                    variant="outline"
+                    size="lg"
+                    className="gap-2"
+                  >
+                    Load More Products
+                    <span className="text-muted-foreground text-xs">
+                      ({displayedProducts.length} of {products.length})
+                    </span>
+                  </Button>
+                </div>
+              )}
+            </>
           )}
 
-          {products.length === 0 && !loading && (
+          {displayedProducts.length === 0 && !loading && (
             <div className="text-center py-20">
-              <p className="text-muted-foreground">No products available at the moment</p>
+              <p className="text-muted-foreground">No products match your filters</p>
             </div>
           )}
         </div>

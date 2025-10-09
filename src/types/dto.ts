@@ -11,6 +11,9 @@ export interface ProductDto {
   stock: number;
   rating?: number;
   createdAt?: string;
+  discount?: number; // Percentage discount
+  onSale?: boolean; // Is on sale
+  inStock?: boolean; // Stock availability filter
 }
 
 export interface CartItemDto {

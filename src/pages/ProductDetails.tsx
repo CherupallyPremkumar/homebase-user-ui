@@ -6,11 +6,14 @@ import { cartService } from "@/services/cartService";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { toast } from "@/hooks/use-toast";
 import { useTenant } from "@/hooks/useTenant";
 import { ShoppingCart, ArrowLeft, Loader2, Package } from "lucide-react";
 import { ProductImageCarousel } from "@/components/ProductImageCarousel";
 import { AnimatedRating } from "@/components/AnimatedRating";
+import { ProductReviews } from "@/components/ProductReviews";
+import { SocialShare } from "@/components/SocialShare";
 
 const ProductDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -165,18 +168,25 @@ const ProductDetails = () => {
                 )}
               </div>
 
-              <Button
-                size="lg"
-                onClick={handleAddToCart}
-                disabled={isOutOfStock}
-                className="w-full sm:w-auto gap-2"
-              >
-                <ShoppingCart className="h-5 w-5" />
-                {isOutOfStock ? "Out of Stock" : "Add to Cart"}
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button
+                  size="lg"
+                  onClick={handleAddToCart}
+                  disabled={isOutOfStock}
+                  className="flex-1 gap-2"
+                >
+                  <ShoppingCart className="h-5 w-5" />
+                  {isOutOfStock ? "Out of Stock" : "Add to Cart"}
+                </Button>
+                
+                <SocialShare
+                  title={product.name}
+                  description={product.description}
+                />
+              </div>
             </div>
 
-            <div className="bg-accent rounded-lg p-6 space-y-2">
+            <div className="bg-muted rounded-lg p-6 space-y-2">
               <h3 className="font-display font-semibold text-foreground">
                 Product Details
               </h3>
@@ -188,6 +198,12 @@ const ProductDetails = () => {
               </ul>
             </div>
           </div>
+        </div>
+
+        {/* Reviews Section */}
+        <Separator className="my-12" />
+        <div className="max-w-4xl mx-auto">
+          <ProductReviews productId={product.id} productName={product.name} />
         </div>
       </main>
     </div>
