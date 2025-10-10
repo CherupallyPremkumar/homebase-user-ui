@@ -1,5 +1,6 @@
-import { useEffect } from "react";
+
 import { TenantConfig } from "@/types/tenant";
+import { useEffect } from "react";
 
 /**
  * Apply dynamic theme and layout by updating CSS variables

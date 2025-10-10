@@ -5,7 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { useTenant } from "@/hooks/useTenant";
 import { useToast } from "@/hooks/use-toast";
@@ -16,56 +22,51 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>(
+    {}
+  );
 
   const { login } = useAuth();
-  const { tenant, buildRoute } = useTenant();
+  const { tenant, setTenant } = useTenant();
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const validateForm = () => {
     const newErrors: { email?: string; password?: string } = {};
-
     if (!email.trim()) {
       newErrors.email = "Email is required";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       newErrors.email = "Invalid email format";
     }
-
     if (!password) {
       newErrors.password = "Password is required";
     } else if (password.length < 6) {
       newErrors.password = "Password must be at least 6 characters";
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!validateForm()) {
       return;
     }
-
     setIsLoading(true);
     setErrors({});
-
     try {
-      await login(email, password, rememberMe);
-      
+      const { tenant } = await login(email, password, rememberMe);
+      setTenant(tenant);
       toast({
         title: "Login successful",
         description: `Welcome back, ${email.split("@")[0]}!`,
       });
-
-      // Redirect to home
-      navigate(buildRoute("/"));
+      navigate("/");
     } catch (error) {
       toast({
         title: "Login failed",
-        description: error instanceof Error ? error.message : "Invalid credentials",
+        description:
+          error instanceof Error ? error.message : "Invalid credentials",
         variant: "destructive",
       });
     } finally {
@@ -100,7 +101,9 @@ const Login = () => {
                   placeholder="you@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className={`pl-10 ${errors.email ? "border-destructive" : ""}`}
+                  className={`pl-10 ${
+                    errors.email ? "border-destructive" : ""
+                  }`}
                   disabled={isLoading}
                 />
               </div>
@@ -123,7 +126,9 @@ const Login = () => {
                   placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className={`pl-10 pr-10 ${errors.password ? "border-destructive" : ""}`}
+                  className={`pl-10 pr-10 ${
+                    errors.password ? "border-destructive" : ""
+                  }`}
                   disabled={isLoading}
                 />
                 <button

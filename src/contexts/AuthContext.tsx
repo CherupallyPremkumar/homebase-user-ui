@@ -1,6 +1,8 @@
+// src/contexts/AuthContext.tsx
 import React, { createContext, useState, useEffect, ReactNode } from "react";
-import { useNavigate } from "react-router-dom";
-import { useTenant } from "@/hooks/useTenant";
+import { useNavigate } from "react-router-dom"; // your API service
+import { authService } from "@/services/authService";
+import { LoginResponse } from "@/services/authService";
 
 export interface AuthUser {
   id: string;
@@ -13,7 +15,11 @@ export interface AuthContextType {
   user: AuthUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
+  login: (
+    email: string,
+    password: string,
+    rememberMe?: boolean
+  ) => Promise<void>;
   logout: () => void;
   getAuthToken: () => string | null;
 }
@@ -34,89 +40,124 @@ interface AuthProviderProps {
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { tenant } = useTenant();
   const navigate = useNavigate();
 
-  // Load user from localStorage on mount
   useEffect(() => {
-    const storedUser = localStorage.getItem("auth_user");
-    const storedToken = localStorage.getItem("auth_token");
-    
-    if (storedUser && storedToken) {
+    let canceled = false;
+
+    const storedUserKeys = Object.keys(localStorage).filter((key) =>
+      key.startsWith("auth_user_")
+    );
+
+    if (storedUserKeys.length === 0) {
+      setIsLoading(false);
+      return;
+    }
+
+    const storedUser = localStorage.getItem(storedUserKeys[0]);
+    const tenantId = storedUserKeys[0].replace("auth_user_", "");
+    const storedToken = localStorage.getItem(`auth_token_${tenantId}`);
+
+    if (!storedUser || !storedToken) {
+      setIsLoading(false);
+      return;
+    }
+
+    const parsedUser = JSON.parse(storedUser);
+    setUser(parsedUser);
+
+    const verifyUser = async () => {
       try {
-        const parsedUser = JSON.parse(storedUser);
-        // Verify tenant matches
-        if (tenant && parsedUser.tenantId === tenant.id) {
-          setUser(parsedUser);
-        } else {
-          // Clear invalid tenant session
-          localStorage.removeItem("auth_user");
-          localStorage.removeItem("auth_token");
-        }
-      } catch (error) {
-        console.error("Failed to parse stored user:", error);
+        const validUser = await authService.verifyToken(storedToken);
+        if (!canceled) setUser(validUser);
+      } catch {
+        if (!canceled) logout();
+      } finally {
+        if (!canceled) setIsLoading(false);
       }
-    }
-    setIsLoading(false);
-  }, [tenant]);
-
-  const login = async (email: string, password: string, rememberMe: boolean = false) => {
-    if (!tenant) {
-      throw new Error("Tenant not detected");
-    }
-
-    // Mock login - replace with actual API call
-    // In production: const response = await authService.login(email, password, tenant.id);
-    
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    // Mock validation
-    if (!email || !password) {
-      throw new Error("Email and password are required");
-    }
-    
-    if (password.length < 6) {
-      throw new Error("Invalid email or password");
-    }
-
-    // Mock user and token
-    const mockUser: AuthUser = {
-      id: "user_" + Math.random().toString(36).substr(2, 9),
-      email,
-      name: email.split("@")[0],
-      tenantId: tenant.id,
     };
 
-    const mockToken = "mock_token_" + Math.random().toString(36).substr(2, 16);
+    verifyUser();
 
-    // Store in localStorage
-    if (rememberMe) {
-      localStorage.setItem("auth_user", JSON.stringify(mockUser));
-      localStorage.setItem("auth_token", mockToken);
-    } else {
-      sessionStorage.setItem("auth_user", JSON.stringify(mockUser));
-      sessionStorage.setItem("auth_token", mockToken);
+    return () => {
+      canceled = true;
+    };
+  }, []);
+
+  const login = async (
+    email: string,
+    password: string,
+    rememberMe: boolean = false
+  ): Promise<LoginResponse> => {
+    setIsLoading(true);
+    try {
+      const response = await authService.login(email, password);
+
+      if (!response?.token || !response.user || !response.tenant)
+        throw new Error("Invalid credentials");
+
+      const userFromApi: AuthUser = {
+        id: response.user.id,
+        email: response.user.email,
+        name: response.user.name,
+        tenantId: response.user.tenantId,
+      };
+
+      if (rememberMe) {
+        localStorage.setItem(
+          `auth_user_${userFromApi.tenantId}`,
+          JSON.stringify(userFromApi)
+        );
+        localStorage.setItem(
+          `auth_token_${userFromApi.tenantId}`,
+          response.token
+        );
+      } else {
+        sessionStorage.setItem(
+          `auth_user_${userFromApi.tenantId}`,
+          JSON.stringify(userFromApi)
+        );
+        sessionStorage.setItem(
+          `auth_token_${userFromApi.tenantId}`,
+          response.token
+        );
+      }
+
+      setUser(userFromApi);
+
+      return {
+        user: userFromApi,
+        token: response.token,
+        tenant: response.tenant, // <-- now returned
+      };
+    } finally {
+      setIsLoading(false);
     }
-
-    setUser(mockUser);
   };
 
   const logout = () => {
-    localStorage.removeItem("auth_user");
-    localStorage.removeItem("auth_token");
-    sessionStorage.removeItem("auth_user");
-    sessionStorage.removeItem("auth_token");
+    Object.keys(localStorage)
+      .filter(
+        (key) => key.startsWith("auth_user_") || key.startsWith("auth_token_")
+      )
+      .forEach((key) => localStorage.removeItem(key));
+
+    Object.keys(sessionStorage)
+      .filter(
+        (key) => key.startsWith("auth_user_") || key.startsWith("auth_token_")
+      )
+      .forEach((key) => sessionStorage.removeItem(key));
+
     setUser(null);
-    
-    // Redirect to login
-    if (tenant) {
-      navigate(tenant.urlPath ? `${tenant.urlPath}/login` : "/login");
-    }
+    navigate("/login");
   };
 
-  const getAuthToken = (): string | null => {
-    return localStorage.getItem("auth_token") || sessionStorage.getItem("auth_token");
+  const getAuthToken = () => {
+    if (!user) return null;
+    return (
+      localStorage.getItem(`auth_token_${user.tenantId}`) ||
+      sessionStorage.getItem(`auth_token_${user.tenantId}`)
+    );
   };
 
   return (

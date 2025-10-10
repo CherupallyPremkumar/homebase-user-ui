@@ -1,3 +1,4 @@
+// src/components/TenantRoutes.tsx
 import { ReactNode } from "react";
 import { useTenant } from "@/hooks/useTenant";
 import { useTheme } from "@/hooks/useTheme";
@@ -7,14 +8,10 @@ interface TenantRoutesProps {
   children: ReactNode;
 }
 
-/**
- * Wrapper component that applies tenant theme and handles loading state
- */
 export const TenantRoutes = ({ children }: TenantRoutesProps) => {
   const { tenant, isLoading } = useTenant();
-  
-  // Apply tenant theme and layout
-  useTheme(tenant);
+
+  useTheme(tenant); // apply theme globally
 
   if (isLoading) {
     return (

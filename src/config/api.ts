@@ -3,12 +3,9 @@
  * Centralized configuration for backend API endpoints
  */
 
-// Backend API base URL
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
 
-// Default tenant ID (can be overridden per request)
-export const DEFAULT_TENANT_ID = import.meta.env.VITE_TENANT_ID || 'default';
-
+const API_BASE_URL = "localhost:8080/api"; // Replace with actual backend URL
+ 
 // API Endpoints
 export const API_ENDPOINTS = {
   // User-facing endpoints
@@ -48,19 +45,36 @@ export const buildUrl = (baseUrl: string, params?: Record<string, string | numbe
 /**
  * Common fetch options
  */
-export const getFetchOptions = (method: string = 'GET', body?: any): RequestInit => {
+// src/config/api.ts
+
+// Get tenant from sessionStorage (must exist)
+export const getTenantId = (): string => {
+  const tenant = sessionStorage.getItem("tenant");
+  if (!tenant) {
+    throw new Error("Tenant not set. Please select a tenant before continuing.");
+  }
+  return tenant;
+};
+
+/**
+ * Common fetch options
+ */
+export const getFetchOptions = (method: string = "GET", body?: any): RequestInit => {
+  const tenantId = getTenantId(); // mandatory tenant
+
   const options: RequestInit = {
     method,
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
+      "X-Tenant-ID": tenantId,
     },
-    credentials: 'include', // Include cookies for session management
+    credentials: "include", // include cookies
   };
-  
+
   if (body) {
     options.body = JSON.stringify(body);
   }
-  
+
   return options;
 };
 

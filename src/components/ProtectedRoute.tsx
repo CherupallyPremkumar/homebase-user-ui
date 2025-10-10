@@ -1,3 +1,4 @@
+// src/components/ProtectedRoute.tsx
 import { ReactNode, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
@@ -8,12 +9,9 @@ interface ProtectedRouteProps {
   children: ReactNode;
 }
 
-/**
- * Wrapper component that protects routes requiring authentication
- */
 export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { isAuthenticated, isLoading } = useAuth();
-  const { tenant, buildRoute } = useTenant();
+  const { buildRoute } = useTenant();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -30,9 +28,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     );
   }
 
-  if (!isAuthenticated) {
-    return null;
-  }
+  if (!isAuthenticated) return null;
 
   return <>{children}</>;
 };

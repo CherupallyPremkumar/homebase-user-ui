@@ -1,10 +1,11 @@
-import { TenantConfig } from "@/types/tenant";
+
 import { 
   getTenantBySubdomain, 
   getTenantByPath, 
   getTenantByDomain,
   DEFAULT_TENANT 
 } from "@/config/tenants";
+import { TenantConfig } from "@/types/tenant";
 
 /**
  * Detect tenant from current URL
@@ -14,53 +15,39 @@ export const detectTenant = (): TenantConfig => {
   const hostname = window.location.hostname;
   const pathname = window.location.pathname;
 
-  // 1. Check for custom domain
-  // e.g., havenhome.com, modernliving.com
+  // 1️⃣ Custom domain detection
   const tenantByDomain = getTenantByDomain(hostname);
-  if (tenantByDomain) {
-    return tenantByDomain;
-  }
+  if (tenantByDomain) return tenantByDomain;
 
-  // 2. Check for subdomain
-  // e.g., havenhome.lovable.app, modernliving.lovable.app
+  // 2️⃣ Subdomain detection (ignoring www)
   const subdomainMatch = hostname.match(/^([^.]+)\./);
-  if (subdomainMatch && subdomainMatch[1] !== 'www') {
-    const subdomain = subdomainMatch[1];
-    const tenantBySubdomain = getTenantBySubdomain(subdomain);
-    if (tenantBySubdomain) {
-      return tenantBySubdomain;
-    }
+  if (subdomainMatch && subdomainMatch[1] !== "www") {
+    const tenantBySubdomain = getTenantBySubdomain(subdomainMatch[1]);
+    if (tenantBySubdomain) return tenantBySubdomain;
   }
 
-  // 3. Check for URL path
-  // e.g., /havenhome/home, /modernliving/cart
-  if (pathname && pathname !== '/') {
+  // 3️⃣ URL path detection
+  if (pathname && pathname !== "/") {
     const tenantByPath = getTenantByPath(pathname);
-    if (tenantByPath) {
-      return tenantByPath;
-    }
+    if (tenantByPath) return tenantByPath;
   }
 
-  // 4. Return default tenant
+  // 4️⃣ Fallback to default tenant
   return DEFAULT_TENANT;
 };
 
 /**
  * Get base path for tenant routing
- * Returns empty string for subdomain/domain, or /tenant-id for path-based
  */
 export const getTenantBasePath = (tenant: TenantConfig): string => {
-  // If using subdomain or custom domain, no base path needed
   const hostname = window.location.hostname;
-  const isSubdomain = hostname.includes(tenant.subdomain || '');
-  const isDomain = tenant.domain && hostname.includes(tenant.domain);
-  
-  if (isSubdomain || isDomain) {
-    return '';
-  }
-  
-  // For path-based routing, return tenant path
-  return tenant.urlPath || '';
+
+  const isSubdomain = tenant.subdomain && hostname.startsWith(`${tenant.subdomain}.`);
+  const isCustomDomain = tenant.domain && hostname.includes(tenant.domain);
+
+  if (isSubdomain || isCustomDomain) return ""; // No path prefix needed
+
+  return tenant.urlPath ? `/${tenant.urlPath}` : ""; // Path-based routing
 };
 
 /**
@@ -68,10 +55,6 @@ export const getTenantBasePath = (tenant: TenantConfig): string => {
  */
 export const buildTenantRoute = (tenant: TenantConfig, route: string): string => {
   const basePath = getTenantBasePath(tenant);
-  
-  // Ensure route starts with /
-  const cleanRoute = route.startsWith('/') ? route : `/${route}`;
-  
-  // Combine base path and route
+  const cleanRoute = route.startsWith("/") ? route : `/${route}`;
   return `${basePath}${cleanRoute}`;
 };

@@ -15,7 +15,10 @@ import { AnimatedRating } from "@/components/AnimatedRating";
 import { ProductReviews } from "@/components/ProductReviews";
 import { SocialShare } from "@/components/SocialShare";
 import { ProductRecommendations } from "@/components/ProductRecommendations";
-import { RecentlyViewed, addToRecentlyViewed } from "@/components/RecentlyViewed";
+import {
+  RecentlyViewed,
+  addToRecentlyViewed,
+} from "@/components/RecentlyViewed";
 import { WishlistButton } from "@/components/WishlistButton";
 import QuickViewModal from "@/components/QuickViewModal";
 
@@ -27,7 +30,9 @@ const ProductDetails = () => {
   const [allProducts, setAllProducts] = useState<ProductDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [cartItemCount, setCartItemCount] = useState(0);
-  const [selectedProduct, setSelectedProduct] = useState<ProductDto | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<ProductDto | null>(
+    null
+  );
   const [quickViewOpen, setQuickViewOpen] = useState(false);
 
   useEffect(() => {
@@ -40,9 +45,9 @@ const ProductDetails = () => {
 
   const loadProduct = async (productId: number) => {
     try {
-      const data = await productService.getProductById(productId, tenant?.id);
+      const data = await productService.getProductById(productId);
       setProduct(data);
-      
+
       // Add to recently viewed
       addToRecentlyViewed(data);
     } catch (error) {
@@ -58,7 +63,7 @@ const ProductDetails = () => {
 
   const loadAllProducts = async () => {
     try {
-      const data = await productService.getAllProducts(tenant?.id);
+      const data = await productService.getAllProducts();
       setAllProducts(data);
     } catch (error) {
       console.error("Failed to load products", error);
@@ -76,7 +81,7 @@ const ProductDetails = () => {
 
   const handleAddToCart = async () => {
     if (!product) return;
-    
+
     try {
       await cartService.addToCart(product.id, 1, tenant?.id);
       setCartItemCount((prev) => prev + 1);
@@ -145,7 +150,11 @@ const ProductDetails = () => {
           {/* Product Images with Zoom */}
           <div className="space-y-4">
             <ProductImageCarousel
-              images={product.images && product.images.length > 0 ? product.images : [product.imageUrl]}
+              images={
+                product.images && product.images.length > 0
+                  ? product.images
+                  : [product.imageUrl]
+              }
               productName={product.name}
             />
           </div>
@@ -162,7 +171,7 @@ const ProductDetails = () => {
               <p className="text-3xl font-display font-bold text-primary mb-4">
                 ₹{(product.price / 100).toFixed(2)}
               </p>
-              
+
               {/* Animated Rating */}
               {product.rating && (
                 <div className="py-4 border-t border-border">
@@ -183,7 +192,10 @@ const ProductDetails = () => {
                 {isOutOfStock ? (
                   <Badge variant="destructive">Out of Stock</Badge>
                 ) : isLowStock ? (
-                  <Badge variant="outline" className="border-warning text-warning">
+                  <Badge
+                    variant="outline"
+                    className="border-warning text-warning"
+                  >
                     Only {product.stock} left in stock
                   </Badge>
                 ) : (
@@ -203,7 +215,7 @@ const ProductDetails = () => {
                   <ShoppingCart className="h-5 w-5" />
                   {isOutOfStock ? "Out of Stock" : "Add to Cart"}
                 </Button>
-                
+
                 <WishlistButton
                   productId={product.id}
                   productName={product.name}
@@ -211,7 +223,7 @@ const ProductDetails = () => {
                   variant="outline"
                   showLabel
                 />
-                
+
                 <SocialShare
                   title={product.name}
                   description={product.description}

@@ -33,25 +33,137 @@ const App = () => (
                 {/* Public routes */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/:tenant/login" element={<Login />} />
-                
+
                 {/* Protected tenant-aware routes */}
-                <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-                <Route path="/:tenant" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-                <Route path="/product/:id" element={<ProtectedRoute><ProductDetails /></ProtectedRoute>} />
-                <Route path="/:tenant/product/:id" element={<ProtectedRoute><ProductDetails /></ProtectedRoute>} />
-                <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
-                <Route path="/:tenant/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
-                <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
-                <Route path="/:tenant/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
-                <Route path="/order/:orderId" element={<ProtectedRoute><OrderConfirmation /></ProtectedRoute>} />
-                <Route path="/:tenant/order/:orderId" element={<ProtectedRoute><OrderConfirmation /></ProtectedRoute>} />
-                <Route path="/payment-failed" element={<ProtectedRoute><PaymentFailed /></ProtectedRoute>} />
-                <Route path="/:tenant/payment-failed" element={<ProtectedRoute><PaymentFailed /></ProtectedRoute>} />
-                <Route path="/orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
-                <Route path="/:tenant/orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
-                <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-                <Route path="/:tenant/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-                
+                <Route
+                  path="/"
+                  element={
+                    <ProtectedRoute>
+                      <Home />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/:tenant"
+                  element={
+                    <ProtectedRoute>
+                      <Home />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/product/:id"
+                  element={
+                    <ProtectedRoute>
+                      <ProductDetails />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/:tenant/product/:id"
+                  element={
+                    <ProtectedRoute>
+                      <ProductDetails />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/cart"
+                  element={
+                    <ProtectedRoute>
+                      <Cart />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/:tenant/cart"
+                  element={
+                    <ProtectedRoute>
+                      <Cart />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/checkout"
+                  element={
+                    <ProtectedRoute>
+                      <Checkout />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/:tenant/checkout"
+                  element={
+                    <ProtectedRoute>
+                      <Checkout />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/order/:orderId"
+                  element={
+                    <ProtectedRoute>
+                      <OrderConfirmation />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/:tenant/order/:orderId"
+                  element={
+                    <ProtectedRoute>
+                      <OrderConfirmation />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/payment-failed"
+                  element={
+                    <ProtectedRoute>
+                      <PaymentFailed />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/:tenant/payment-failed"
+                  element={
+                    <ProtectedRoute>
+                      <PaymentFailed />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/orders"
+                  element={
+                    <ProtectedRoute>
+                      <MyOrders />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/:tenant/orders"
+                  element={
+                    <ProtectedRoute>
+                      <MyOrders />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/profile"
+                  element={
+                    <ProtectedRoute>
+                      <Profile />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/:tenant/profile"
+                  element={
+                    <ProtectedRoute>
+                      <Profile />
+                    </ProtectedRoute>
+                  }
+                />
+
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
