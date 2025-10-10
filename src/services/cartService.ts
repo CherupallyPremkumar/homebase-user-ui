@@ -1,52 +1,60 @@
 import { CartItemDto } from "@/types/dto";
+import { API_ENDPOINTS, DEFAULT_TENANT_ID, buildUrl, getFetchOptions, handleApiError } from "@/config/api";
 import { productService } from "./productService";
 
-// TODO: Replace with actual backend API endpoint
-const API_BASE_URL = "/api";
-
-// Mock cart storage (in real app, this would be backend state)
+// Mock cart storage for development fallback
 let mockCart: CartItemDto[] = [];
 
 export const cartService = {
-  // GET /api/cart?tenantId={tenantId}
-  getCart: async (tenantId?: string): Promise<CartItemDto[]> => {
-    // TODO: Implement actual API call to Spring Boot backend
-    // Include tenant ID to get tenant-specific cart
-    // const response = await fetch(`${API_BASE_URL}/cart?tenantId=${tenantId}`, {
-    //   credentials: 'include',
-    // });
-    // if (!response.ok) throw new Error('Failed to fetch cart');
-    // return response.json();
-    
-    // Mock implementation
-    return new Promise((resolve) => {
-      setTimeout(() => resolve([...mockCart]), 300);
-    });
+  /**
+   * GET /api/user/cart?customerId={customerId}&tenantId={tenantId}
+   * Get cart items for a customer
+   */
+  getCart: async (customerId: number, tenantId: string = DEFAULT_TENANT_ID): Promise<CartItemDto[]> => {
+    try {
+      const url = buildUrl(API_ENDPOINTS.user.cart, { customerId, tenantId });
+      const response = await fetch(url, getFetchOptions('GET'));
+      
+      if (!response.ok) {
+        await handleApiError(response);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Failed to fetch cart:', error);
+      // Fallback to mock data in development
+      if (import.meta.env.DEV) {
+        return [...mockCart];
+      }
+      throw error;
+    }
   },
 
-  // POST /api/cart?tenantId={tenantId}
-  addToCart: async (productId: number, quantity: number = 1, tenantId?: string): Promise<CartItemDto> => {
-    // TODO: Implement actual API call to Spring Boot backend
-    // const response = await fetch(`${API_BASE_URL}/cart?tenantId=${tenantId}`, {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   credentials: 'include',
-    //   body: JSON.stringify({ productId, quantity }),
-    // });
-    // if (!response.ok) throw new Error('Failed to add to cart');
-    // return response.json();
-    
-    // Mock implementation
-    return new Promise(async (resolve) => {
-      setTimeout(async () => {
+  /**
+   * POST /api/user/cart?customerId={customerId}&tenantId={tenantId}
+   * Add item to cart
+   */
+  addToCart: async (customerId: number, productId: number, quantity: number = 1, tenantId: string = DEFAULT_TENANT_ID): Promise<CartItemDto> => {
+    try {
+      const url = buildUrl(API_ENDPOINTS.user.cart, { customerId, tenantId });
+      const response = await fetch(url, getFetchOptions('POST', { productId, quantity }));
+      
+      if (!response.ok) {
+        await handleApiError(response);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Failed to add to cart:', error);
+      // Fallback to mock data in development
+      if (import.meta.env.DEV) {
         const existingItem = mockCart.find(item => item.productId === productId);
         
         if (existingItem) {
           existingItem.quantity += quantity;
           existingItem.subtotal = existingItem.price * existingItem.quantity;
-          resolve(existingItem);
+          return existingItem;
         } else {
-          // Get product details for cart item
           const product = await productService.getProductById(productId, tenantId);
           if (!product) throw new Error('Product not found');
           
@@ -60,72 +68,86 @@ export const cartService = {
             subtotal: product.price * quantity,
           };
           mockCart.push(newItem);
-          resolve(newItem);
+          return newItem;
         }
-      }, 300);
-    });
+      }
+      throw error;
+    }
   },
 
-  // PUT /api/cart/{itemId}?tenantId={tenantId}
-  updateCartItem: async (itemId: number, quantity: number, tenantId?: string): Promise<CartItemDto> => {
-    // TODO: Implement actual API call to Spring Boot backend
-    // const response = await fetch(`${API_BASE_URL}/cart/${itemId}?tenantId=${tenantId}`, {
-    //   method: 'PUT',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   credentials: 'include',
-    //   body: JSON.stringify({ quantity }),
-    // });
-    // if (!response.ok) throw new Error('Failed to update cart item');
-    // return response.json();
-    
-    // Mock implementation
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
+  /**
+   * PUT /api/user/cart/{itemId}?tenantId={tenantId}
+   * Update cart item quantity
+   */
+  updateCartItem: async (itemId: number, quantity: number, tenantId: string = DEFAULT_TENANT_ID): Promise<CartItemDto> => {
+    try {
+      const url = buildUrl(`${API_ENDPOINTS.user.cart}/${itemId}`, { tenantId });
+      const response = await fetch(url, getFetchOptions('PUT', { quantity }));
+      
+      if (!response.ok) {
+        await handleApiError(response);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Failed to update cart item:', error);
+      // Fallback to mock data in development
+      if (import.meta.env.DEV) {
         const item = mockCart.find(i => i.id === itemId);
         if (item) {
           item.quantity = quantity;
           item.subtotal = item.price * quantity;
-          resolve(item);
-        } else {
-          reject(new Error('Cart item not found'));
+          return item;
         }
-      }, 300);
-    });
+        throw new Error('Cart item not found');
+      }
+      throw error;
+    }
   },
 
-  // DELETE /api/cart/{itemId}?tenantId={tenantId}
-  removeFromCart: async (itemId: number, tenantId?: string): Promise<void> => {
-    // TODO: Implement actual API call to Spring Boot backend
-    // const response = await fetch(`${API_BASE_URL}/cart/${itemId}?tenantId=${tenantId}`, {
-    //   method: 'DELETE',
-    //   credentials: 'include',
-    // });
-    // if (!response.ok) throw new Error('Failed to remove from cart');
-    
-    // Mock implementation
-    return new Promise((resolve) => {
-      setTimeout(() => {
+  /**
+   * DELETE /api/user/cart/{itemId}?tenantId={tenantId}
+   * Remove item from cart
+   */
+  removeFromCart: async (itemId: number, tenantId: string = DEFAULT_TENANT_ID): Promise<void> => {
+    try {
+      const url = buildUrl(`${API_ENDPOINTS.user.cart}/${itemId}`, { tenantId });
+      const response = await fetch(url, getFetchOptions('DELETE'));
+      
+      if (!response.ok) {
+        await handleApiError(response);
+      }
+    } catch (error) {
+      console.error('Failed to remove from cart:', error);
+      // Fallback to mock data in development
+      if (import.meta.env.DEV) {
         mockCart = mockCart.filter(item => item.id !== itemId);
-        resolve();
-      }, 300);
-    });
+        return;
+      }
+      throw error;
+    }
   },
 
-  // DELETE /api/cart?tenantId={tenantId}
-  clearCart: async (tenantId?: string): Promise<void> => {
-    // TODO: Implement actual API call to Spring Boot backend
-    // const response = await fetch(`${API_BASE_URL}/cart?tenantId=${tenantId}`, {
-    //   method: 'DELETE',
-    //   credentials: 'include',
-    // });
-    // if (!response.ok) throw new Error('Failed to clear cart');
-    
-    // Mock implementation
-    return new Promise((resolve) => {
-      setTimeout(() => {
+  /**
+   * DELETE /api/user/cart?customerId={customerId}&tenantId={tenantId}
+   * Clear all items from cart
+   */
+  clearCart: async (customerId: number, tenantId: string = DEFAULT_TENANT_ID): Promise<void> => {
+    try {
+      const url = buildUrl(API_ENDPOINTS.user.cart, { customerId, tenantId });
+      const response = await fetch(url, getFetchOptions('DELETE'));
+      
+      if (!response.ok) {
+        await handleApiError(response);
+      }
+    } catch (error) {
+      console.error('Failed to clear cart:', error);
+      // Fallback to mock data in development
+      if (import.meta.env.DEV) {
         mockCart = [];
-        resolve();
-      }, 300);
-    });
+        return;
+      }
+      throw error;
+    }
   },
 };

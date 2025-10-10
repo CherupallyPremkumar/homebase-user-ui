@@ -65,6 +65,7 @@ export enum OrderStatus {
 
 export interface OrderDto {
   id: string;
+  orderNumber?: string; // Added to match backend
   customerId?: number;
   customerName: string;
   customerEmail: string;
