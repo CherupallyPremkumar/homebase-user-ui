@@ -11,8 +11,8 @@ import { NotificationSettings } from "@/components/profile/NotificationSettings"
 import { useAuth } from "@/hooks/useAuth";
 import { useTenant } from "@/hooks/useTenant";
 import { useToast } from "@/hooks/use-toast";
-import { getProfile } from "@/services/profileService";
-import { getOrders } from "@/services/orderService";
+import { profileService } from "@/services/profileService";
+import { orderService } from "@/services/orderService";
 import { CustomerProfileDto, OrderDto } from "@/types/dto";
 
 const Profile = () => {
@@ -32,8 +32,8 @@ const Profile = () => {
     setIsLoading(true);
     try {
       const [profileData, ordersData] = await Promise.all([
-        getProfile(tenant.id),
-        getOrders(tenant.id),
+        profileService.getProfile(user.id),
+        orderService.getAllOrders(user.id),
       ]);
       setProfile(profileData);
       setOrders(ordersData);
@@ -105,7 +105,11 @@ const Profile = () => {
           </p>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="space-y-6"
+        >
           <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 h-auto">
             <TabsTrigger value="overview" className="py-2">
               Overview
@@ -140,7 +144,10 @@ const Profile = () => {
           </TabsContent>
 
           <TabsContent value="addresses">
-            <AddressCard addresses={profile.addresses} onUpdate={fetchProfileData} />
+            <AddressCard
+              addresses={profile.addresses}
+              onUpdate={fetchProfileData}
+            />
           </TabsContent>
 
           <TabsContent value="settings">

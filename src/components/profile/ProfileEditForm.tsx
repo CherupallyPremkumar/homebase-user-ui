@@ -3,11 +3,18 @@ import { User, Mail, Phone, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useTenant } from "@/hooks/useTenant";
-import { updateProfile } from "@/services/profileService";
+import { profileService } from "@/services/profileService";
 import { UpdateProfileDto } from "@/types/dto";
+import { useAuth } from "@/hooks/useAuth";
 
 interface ProfileEditFormProps {
   initialData: {
@@ -18,15 +25,19 @@ interface ProfileEditFormProps {
   onUpdate: () => void;
 }
 
-export const ProfileEditForm = ({ initialData, onUpdate }: ProfileEditFormProps) => {
+export const ProfileEditForm = ({
+  initialData,
+  onUpdate,
+}: ProfileEditFormProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState(initialData.name);
   const [phone, setPhone] = useState(initialData.phone || "");
   const [errors, setErrors] = useState<{ name?: string; phone?: string }>({});
-  
+
   const { toast } = useToast();
   const { tenant } = useTenant();
+  const { user } = useAuth();
 
   const validateForm = () => {
     const newErrors: { name?: string; phone?: string } = {};
@@ -53,7 +64,7 @@ export const ProfileEditForm = ({ initialData, onUpdate }: ProfileEditFormProps)
         phone: phone || undefined,
       };
 
-      await updateProfile(tenant.id, updateData);
+      await profileService.updateProfile(user.id, updateData);
 
       toast({
         title: "Profile updated",
@@ -83,7 +94,9 @@ export const ProfileEditForm = ({ initialData, onUpdate }: ProfileEditFormProps)
   return (
     <Card className="shadow-lg">
       <CardHeader>
-        <CardTitle className="text-xl font-display">Personal Information</CardTitle>
+        <CardTitle className="text-xl font-display">
+          Personal Information
+        </CardTitle>
         <CardDescription>Manage your personal details</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -102,7 +115,9 @@ export const ProfileEditForm = ({ initialData, onUpdate }: ProfileEditFormProps)
             />
           </div>
           {errors.name && (
-            <p className="text-sm text-destructive animate-fade-in">{errors.name}</p>
+            <p className="text-sm text-destructive animate-fade-in">
+              {errors.name}
+            </p>
           )}
         </div>
 
@@ -120,7 +135,9 @@ export const ProfileEditForm = ({ initialData, onUpdate }: ProfileEditFormProps)
               disabled
             />
           </div>
-          <p className="text-xs text-muted-foreground">Email cannot be changed</p>
+          <p className="text-xs text-muted-foreground">
+            Email cannot be changed
+          </p>
         </div>
 
         <div className="space-y-2">
@@ -140,7 +157,9 @@ export const ProfileEditForm = ({ initialData, onUpdate }: ProfileEditFormProps)
             />
           </div>
           {errors.phone && (
-            <p className="text-sm text-destructive animate-fade-in">{errors.phone}</p>
+            <p className="text-sm text-destructive animate-fade-in">
+              {errors.phone}
+            </p>
           )}
         </div>
 

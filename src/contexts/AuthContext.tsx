@@ -1,9 +1,8 @@
 // src/contexts/AuthContext.tsx
+
 import React, { createContext, useState, useEffect, ReactNode } from "react";
 import { useNavigate } from "react-router-dom"; // your API service
-import { authService } from "@/services/authService";
-import { LoginResponse } from "@/services/authService";
-
+import authService, { LoginResponse } from "@/services/authService";
 export interface AuthUser {
   id: string;
   email: string;
@@ -19,7 +18,7 @@ export interface AuthContextType {
     email: string,
     password: string,
     rememberMe?: boolean
-  ) => Promise<void>;
+  ) => Promise<LoginResponse>; // <-- change from void
   logout: () => void;
   getAuthToken: () => string | null;
 }
@@ -28,7 +27,9 @@ export const AuthContext = createContext<AuthContextType>({
   user: null,
   isAuthenticated: false,
   isLoading: true,
-  login: async () => {},
+  login: async (): Promise<LoginResponse> => {
+    throw new Error("login must be used within AuthProvider");
+  },
   logout: () => {},
   getAuthToken: () => null,
 });

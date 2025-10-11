@@ -1,161 +1,95 @@
 import { CustomerProfileDto, AddressDto, NotificationSettingsDto, UpdateProfileDto } from "@/types/dto";
+import { API_ENDPOINTS, buildUrl, getFetchOptions, handleApiError, getTenantId } from "@/config/api";
 
 /**
- * Profile Service - Mock implementation
- * Replace with actual API endpoints
+ * Profile Service - Production Ready
  */
+export const profileService = {
+  /**
+   * Get customer profile by customer ID
+   */
+  getProfile: async (customerId: string): Promise<CustomerProfileDto> => {
+    const tenantId = getTenantId();
+    const url = buildUrl(API_ENDPOINTS.user.profile, { customerId, tenantId });
+    const response = await fetch(url, getFetchOptions('GET'));
 
-// Mock profile data
-const mockProfile: CustomerProfileDto = {
-  id: "customer_123",
-  name: "John Doe",
-  email: "john@example.com",
-  phone: "+91-9876543210",
-  tenantId: "havenhome",
-  addresses: [
-    {
-      id: "addr_1",
-      label: "Home",
-      fullName: "John Doe",
-      phone: "+91-9876543210",
-      addressLine1: "123 Main Street",
-      addressLine2: "Apartment 4B",
-      city: "Mumbai",
-      state: "Maharashtra",
-      pincode: "400001",
-      isDefault: true,
-    },
-    {
-      id: "addr_2",
-      label: "Office",
-      fullName: "John Doe",
-      phone: "+91-9876543210",
-      addressLine1: "456 Business Park",
-      city: "Mumbai",
-      state: "Maharashtra",
-      pincode: "400002",
-      isDefault: false,
-    },
-  ],
-  notificationSettings: {
-    orderUpdates: true,
-    promotions: true,
-    newsletter: false,
+    if (!response.ok) {
+      await handleApiError(response);
+    }
+
+    return response.json();
   },
-};
 
-/**
- * Get customer profile
- */
-export const getProfile = async (tenantId: string): Promise<CustomerProfileDto> => {
-  // TODO: Replace with actual API call
-  // const response = await fetch(`/api/customer/profile?tenantId=${tenantId}`);
-  // return await response.json();
+  /**
+   * Update customer profile
+   */
+  updateProfile: async (customerId: string, data: UpdateProfileDto): Promise<CustomerProfileDto> => {
+    const tenantId = getTenantId();
+    const url = buildUrl(API_ENDPOINTS.user.profile, { customerId, tenantId });
+    const response = await fetch(url, getFetchOptions('PUT', data));
 
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  return { ...mockProfile, tenantId };
-};
+    if (!response.ok) {
+      await handleApiError(response);
+    }
 
-/**
- * Update customer profile
- */
-export const updateProfile = async (
-  tenantId: string,
-  data: UpdateProfileDto
-): Promise<CustomerProfileDto> => {
-  // TODO: Replace with actual API call
-  // const response = await fetch(`/api/customer/profile?tenantId=${tenantId}`, {
-  //   method: 'PUT',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify(data),
-  // });
-  // return await response.json();
+    return response.json();
+  },
 
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  return {
-    ...mockProfile,
-    name: data.name,
-    phone: data.phone,
-    tenantId,
-  };
-};
+  /**
+   * Add new address
+   */
+  addAddress: async (customerId: string, address: Omit<AddressDto, "id">): Promise<AddressDto> => {
+    const tenantId = getTenantId();
+    const url = buildUrl(API_ENDPOINTS.user.address, { customerId, tenantId });
+    const response = await fetch(url, getFetchOptions('POST', address));
 
-/**
- * Add new address
- */
-export const addAddress = async (
-  tenantId: string,
-  address: Omit<AddressDto, "id">
-): Promise<AddressDto> => {
-  // TODO: Replace with actual API call
-  // const response = await fetch(`/api/customer/address?tenantId=${tenantId}`, {
-  //   method: 'POST',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify(address),
-  // });
-  // return await response.json();
+    if (!response.ok) {
+      await handleApiError(response);
+    }
 
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  return {
-    ...address,
-    id: `addr_${Date.now()}`,
-  };
-};
+    return response.json();
+  },
 
-/**
- * Update address
- */
-export const updateAddress = async (
-  tenantId: string,
-  addressId: string,
-  address: Partial<AddressDto>
-): Promise<AddressDto> => {
-  // TODO: Replace with actual API call
-  // const response = await fetch(`/api/customer/address/${addressId}?tenantId=${tenantId}`, {
-  //   method: 'PUT',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify(address),
-  // });
-  // return await response.json();
+  /**
+   * Update address
+   */
+  updateAddress: async (customerId: string, addressId: string, address: Partial<AddressDto>): Promise<AddressDto> => {
+    const tenantId = getTenantId();
+    const url = buildUrl(`${API_ENDPOINTS.user.address}/${addressId}`, { customerId, tenantId });
+    const response = await fetch(url, getFetchOptions('PUT', address));
 
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  const existingAddress = mockProfile.addresses.find((a) => a.id === addressId);
-  return {
-    ...existingAddress!,
-    ...address,
-  };
-};
+    if (!response.ok) {
+      await handleApiError(response);
+    }
 
-/**
- * Delete address
- */
-export const deleteAddress = async (
-  tenantId: string,
-  addressId: string
-): Promise<void> => {
-  // TODO: Replace with actual API call
-  // await fetch(`/api/customer/address/${addressId}?tenantId=${tenantId}`, {
-  //   method: 'DELETE',
-  // });
+    return response.json();
+  },
 
-  await new Promise((resolve) => setTimeout(resolve, 500));
-};
+  /**
+   * Delete address
+   */
+  deleteAddress: async (customerId: string, addressId: string): Promise<void> => {
+    const tenantId = getTenantId();
+    const url = buildUrl(`${API_ENDPOINTS.user.address}/${addressId}`, { customerId, tenantId });
+    const response = await fetch(url, getFetchOptions('DELETE'));
 
-/**
- * Update notification settings
- */
-export const updateNotificationSettings = async (
-  tenantId: string,
-  settings: NotificationSettingsDto
-): Promise<NotificationSettingsDto> => {
-  // TODO: Replace with actual API call
-  // const response = await fetch(`/api/customer/notifications?tenantId=${tenantId}`, {
-  //   method: 'PUT',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify(settings),
-  // });
-  // return await response.json();
+    if (!response.ok) {
+      await handleApiError(response);
+    }
+  },
 
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  return settings;
+  /**
+   * Update notification settings
+   */
+  updateNotificationSettings: async (customerId: string, settings: NotificationSettingsDto): Promise<NotificationSettingsDto> => {
+    const tenantId = getTenantId();
+    const url = buildUrl(API_ENDPOINTS.user.notifications, { customerId, tenantId });
+    const response = await fetch(url, getFetchOptions('PUT', settings));
+
+    if (!response.ok) {
+      await handleApiError(response);
+    }
+
+    return response.json();
+  },
 };

@@ -1,8 +1,4 @@
-/**
- * API Configuration
- * Centralized configuration for backend API endpoints
- */
-
+import { profile } from "console";
 
 const API_BASE_URL = "localhost:8080/api"; // Replace with actual backend URL
  
@@ -15,6 +11,11 @@ export const API_ENDPOINTS = {
     order: `${API_BASE_URL}/user/order`,
     payment: `${API_BASE_URL}/user/payment`,
     products: `${API_BASE_URL}/user/products`,
+    profile: `${API_BASE_URL}/user/profile`,
+    address: `${API_BASE_URL}/user/address`,
+    reviews: `${API_BASE_URL}/user/reviews`,
+    categories: `${API_BASE_URL}/user/categories`,
+    notifications: `${API_BASE_URL}/user/notifications`,
   },
   
   // Admin endpoints (if needed)
@@ -22,6 +23,10 @@ export const API_ENDPOINTS = {
     products: `${API_BASE_URL}/products`,
     orders: `${API_BASE_URL}/orders`,
     customers: `${API_BASE_URL}/customers`,
+    categories: `${API_BASE_URL}/categories`,
+    reviews: `${API_BASE_URL}/reviews`,
+    analytics: `${API_BASE_URL}/analytics`,
+    settings: `${API_BASE_URL}/settings`,
   },
 };
 

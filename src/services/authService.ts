@@ -12,7 +12,7 @@ export interface LoginRequest {
   tenantId: string;
 }
 
-interface LoginResponse {
+export interface LoginResponse {
   user: AuthUser;
   token: string;
   tenant: TenantConfig;

@@ -1,5 +1,11 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,7 +13,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { AddressDto } from "@/types/dto";
 import { useToast } from "@/hooks/use-toast";
 import { useTenant } from "@/hooks/useTenant";
-import { addAddress, updateAddress } from "@/services/profileService";
+import { profileService } from "@/services/profileService";
+import { useAuth } from "@/hooks/useAuth";
 
 interface AddressDialogProps {
   open: boolean;
@@ -15,7 +22,11 @@ interface AddressDialogProps {
   onClose: (updated: boolean) => void;
 }
 
-export const AddressDialog = ({ open, address, onClose }: AddressDialogProps) => {
+export const AddressDialog = ({
+  open,
+  address,
+  onClose,
+}: AddressDialogProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     label: "",
@@ -29,9 +40,10 @@ export const AddressDialog = ({ open, address, onClose }: AddressDialogProps) =>
     isDefault: false,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  
+
   const { toast } = useToast();
   const { tenant } = useTenant();
+  const { user } = useAuth();
 
   useEffect(() => {
     if (address) {
@@ -68,12 +80,15 @@ export const AddressDialog = ({ open, address, onClose }: AddressDialogProps) =>
     if (!formData.label.trim()) newErrors.label = "Label is required";
     if (!formData.fullName.trim()) newErrors.fullName = "Full name is required";
     if (!formData.phone.trim()) newErrors.phone = "Phone is required";
-    if (!/^[+]?[\d\s-()]+$/.test(formData.phone)) newErrors.phone = "Invalid phone number";
-    if (!formData.addressLine1.trim()) newErrors.addressLine1 = "Address is required";
+    if (!/^[+]?[\d\s-()]+$/.test(formData.phone))
+      newErrors.phone = "Invalid phone number";
+    if (!formData.addressLine1.trim())
+      newErrors.addressLine1 = "Address is required";
     if (!formData.city.trim()) newErrors.city = "City is required";
     if (!formData.state.trim()) newErrors.state = "State is required";
     if (!formData.pincode.trim()) newErrors.pincode = "Pincode is required";
-    if (!/^\d{6}$/.test(formData.pincode)) newErrors.pincode = "Invalid pincode";
+    if (!/^\d{6}$/.test(formData.pincode))
+      newErrors.pincode = "Invalid pincode";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -81,19 +96,19 @@ export const AddressDialog = ({ open, address, onClose }: AddressDialogProps) =>
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm() || !tenant) return;
 
     setIsLoading(true);
     try {
       if (address) {
-        await updateAddress(tenant.id, address.id, formData);
+        await profileService.updateAddress(user.id, address.id, formData);
         toast({
           title: "Address updated",
           description: "Your address has been updated successfully",
         });
       } else {
-        await addAddress(tenant.id, formData);
+        await profileService.addAddress(user.id, formData);
         toast({
           title: "Address added",
           description: "New address has been added successfully",
@@ -115,9 +130,13 @@ export const AddressDialog = ({ open, address, onClose }: AddressDialogProps) =>
     <Dialog open={open} onOpenChange={() => onClose(false)}>
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{address ? "Edit Address" : "Add New Address"}</DialogTitle>
+          <DialogTitle>
+            {address ? "Edit Address" : "Add New Address"}
+          </DialogTitle>
           <DialogDescription>
-            {address ? "Update your delivery address" : "Add a new delivery address"}
+            {address
+              ? "Update your delivery address"
+              : "Add a new delivery address"}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -126,10 +145,14 @@ export const AddressDialog = ({ open, address, onClose }: AddressDialogProps) =>
             <Input
               id="label"
               value={formData.label}
-              onChange={(e) => setFormData({ ...formData, label: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, label: e.target.value })
+              }
               className={errors.label ? "border-destructive" : ""}
             />
-            {errors.label && <p className="text-sm text-destructive">{errors.label}</p>}
+            {errors.label && (
+              <p className="text-sm text-destructive">{errors.label}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -137,10 +160,14 @@ export const AddressDialog = ({ open, address, onClose }: AddressDialogProps) =>
             <Input
               id="fullName"
               value={formData.fullName}
-              onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, fullName: e.target.value })
+              }
               className={errors.fullName ? "border-destructive" : ""}
             />
-            {errors.fullName && <p className="text-sm text-destructive">{errors.fullName}</p>}
+            {errors.fullName && (
+              <p className="text-sm text-destructive">{errors.fullName}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -148,10 +175,14 @@ export const AddressDialog = ({ open, address, onClose }: AddressDialogProps) =>
             <Input
               id="phone"
               value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, phone: e.target.value })
+              }
               className={errors.phone ? "border-destructive" : ""}
             />
-            {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
+            {errors.phone && (
+              <p className="text-sm text-destructive">{errors.phone}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -159,10 +190,14 @@ export const AddressDialog = ({ open, address, onClose }: AddressDialogProps) =>
             <Input
               id="addressLine1"
               value={formData.addressLine1}
-              onChange={(e) => setFormData({ ...formData, addressLine1: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, addressLine1: e.target.value })
+              }
               className={errors.addressLine1 ? "border-destructive" : ""}
             />
-            {errors.addressLine1 && <p className="text-sm text-destructive">{errors.addressLine1}</p>}
+            {errors.addressLine1 && (
+              <p className="text-sm text-destructive">{errors.addressLine1}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -170,7 +205,9 @@ export const AddressDialog = ({ open, address, onClose }: AddressDialogProps) =>
             <Input
               id="addressLine2"
               value={formData.addressLine2}
-              onChange={(e) => setFormData({ ...formData, addressLine2: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, addressLine2: e.target.value })
+              }
             />
           </div>
 
@@ -180,10 +217,14 @@ export const AddressDialog = ({ open, address, onClose }: AddressDialogProps) =>
               <Input
                 id="city"
                 value={formData.city}
-                onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, city: e.target.value })
+                }
                 className={errors.city ? "border-destructive" : ""}
               />
-              {errors.city && <p className="text-sm text-destructive">{errors.city}</p>}
+              {errors.city && (
+                <p className="text-sm text-destructive">{errors.city}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -191,10 +232,14 @@ export const AddressDialog = ({ open, address, onClose }: AddressDialogProps) =>
               <Input
                 id="state"
                 value={formData.state}
-                onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, state: e.target.value })
+                }
                 className={errors.state ? "border-destructive" : ""}
               />
-              {errors.state && <p className="text-sm text-destructive">{errors.state}</p>}
+              {errors.state && (
+                <p className="text-sm text-destructive">{errors.state}</p>
+              )}
             </div>
           </div>
 
@@ -203,19 +248,28 @@ export const AddressDialog = ({ open, address, onClose }: AddressDialogProps) =>
             <Input
               id="pincode"
               value={formData.pincode}
-              onChange={(e) => setFormData({ ...formData, pincode: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, pincode: e.target.value })
+              }
               className={errors.pincode ? "border-destructive" : ""}
             />
-            {errors.pincode && <p className="text-sm text-destructive">{errors.pincode}</p>}
+            {errors.pincode && (
+              <p className="text-sm text-destructive">{errors.pincode}</p>
+            )}
           </div>
 
           <div className="flex items-center space-x-2">
             <Checkbox
               id="isDefault"
               checked={formData.isDefault}
-              onCheckedChange={(checked) => setFormData({ ...formData, isDefault: checked === true })}
+              onCheckedChange={(checked) =>
+                setFormData({ ...formData, isDefault: checked === true })
+              }
             />
-            <label htmlFor="isDefault" className="text-sm font-medium cursor-pointer">
+            <label
+              htmlFor="isDefault"
+              className="text-sm font-medium cursor-pointer"
+            >
               Set as default address
             </label>
           </div>

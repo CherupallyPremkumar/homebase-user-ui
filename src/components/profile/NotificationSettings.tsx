@@ -1,24 +1,34 @@
 import { useState } from "react";
 import { Bell } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { NotificationSettingsDto } from "@/types/dto";
 import { useToast } from "@/hooks/use-toast";
 import { useTenant } from "@/hooks/useTenant";
-import { updateNotificationSettings } from "@/services/profileService";
+import { profileService } from "@/services/profileService";
+import { useAuth } from "@/hooks/useAuth";
 
 interface NotificationSettingsProps {
   initialSettings: NotificationSettingsDto;
   onUpdate: () => void;
 }
 
-export const NotificationSettings = ({ initialSettings, onUpdate }: NotificationSettingsProps) => {
+export const NotificationSettings = ({
+  initialSettings,
+  onUpdate,
+}: NotificationSettingsProps) => {
   const [settings, setSettings] = useState(initialSettings);
   const [isLoading, setIsLoading] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
-  
+  const { user } = useAuth();
   const { toast } = useToast();
   const { tenant } = useTenant();
 
@@ -32,7 +42,7 @@ export const NotificationSettings = ({ initialSettings, onUpdate }: Notification
 
     setIsLoading(true);
     try {
-      await updateNotificationSettings(tenant.id, settings);
+      await profileService.updateNotificationSettings(user.id, settings);
       toast({
         title: "Settings updated",
         description: "Your notification preferences have been saved",
@@ -68,7 +78,10 @@ export const NotificationSettings = ({ initialSettings, onUpdate }: Notification
         <div className="space-y-4">
           <div className="flex items-center justify-between space-x-4 p-3 rounded-lg hover:bg-muted/50 transition-smooth">
             <div className="flex-1">
-              <Label htmlFor="orderUpdates" className="text-sm font-semibold cursor-pointer">
+              <Label
+                htmlFor="orderUpdates"
+                className="text-sm font-semibold cursor-pointer"
+              >
                 Order Updates
               </Label>
               <p className="text-xs text-muted-foreground mt-1">
@@ -84,7 +97,10 @@ export const NotificationSettings = ({ initialSettings, onUpdate }: Notification
 
           <div className="flex items-center justify-between space-x-4 p-3 rounded-lg hover:bg-muted/50 transition-smooth">
             <div className="flex-1">
-              <Label htmlFor="promotions" className="text-sm font-semibold cursor-pointer">
+              <Label
+                htmlFor="promotions"
+                className="text-sm font-semibold cursor-pointer"
+              >
                 Promotions & Offers
               </Label>
               <p className="text-xs text-muted-foreground mt-1">
@@ -100,7 +116,10 @@ export const NotificationSettings = ({ initialSettings, onUpdate }: Notification
 
           <div className="flex items-center justify-between space-x-4 p-3 rounded-lg hover:bg-muted/50 transition-smooth">
             <div className="flex-1">
-              <Label htmlFor="newsletter" className="text-sm font-semibold cursor-pointer">
+              <Label
+                htmlFor="newsletter"
+                className="text-sm font-semibold cursor-pointer"
+              >
                 Newsletter
               </Label>
               <p className="text-xs text-muted-foreground mt-1">
@@ -117,7 +136,11 @@ export const NotificationSettings = ({ initialSettings, onUpdate }: Notification
 
         {hasChanges && (
           <div className="flex gap-3 pt-2">
-            <Button onClick={handleSave} disabled={isLoading} className="flex-1">
+            <Button
+              onClick={handleSave}
+              disabled={isLoading}
+              className="flex-1"
+            >
               {isLoading ? "Saving..." : "Save Changes"}
             </Button>
             <Button

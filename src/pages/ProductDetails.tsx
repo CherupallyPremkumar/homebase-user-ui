@@ -21,69 +21,59 @@ import {
 } from "@/components/RecentlyViewed";
 import { WishlistButton } from "@/components/WishlistButton";
 import QuickViewModal from "@/components/QuickViewModal";
+import { useAuth } from "@/hooks/useAuth";
 
 const ProductDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { tenant, buildRoute } = useTenant();
+  const { user } = useAuth();
   const [product, setProduct] = useState<ProductDto | null>(null);
   const [allProducts, setAllProducts] = useState<ProductDto[]>([]);
-  const [loading, setLoading] = useState(true);
   const [cartItemCount, setCartItemCount] = useState(0);
+  const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<ProductDto | null>(
     null
   );
   const [quickViewOpen, setQuickViewOpen] = useState(false);
 
   useEffect(() => {
-    if (id && tenant) {
-      loadProduct(parseInt(id));
-      loadAllProducts();
-      loadCartCount();
-    }
+    if (!id || !tenant?.id) return;
+
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+
+        const [productData, allProductsData, cart] = await Promise.all([
+          productService.getProductById(parseInt(id)),
+          productService.getAllProducts(),
+          cartService.getCart(user?.id),
+        ]);
+
+        setProduct(productData);
+        setAllProducts(allProductsData);
+        setCartItemCount(cart.length);
+
+        addToRecentlyViewed(productData);
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to load product or cart data",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, [id, tenant]);
 
-  const loadProduct = async (productId: number) => {
-    try {
-      const data = await productService.getProductById(productId);
-      setProduct(data);
-
-      // Add to recently viewed
-      addToRecentlyViewed(data);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to load product details",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadAllProducts = async () => {
-    try {
-      const data = await productService.getAllProducts();
-      setAllProducts(data);
-    } catch (error) {
-      console.error("Failed to load products", error);
-    }
-  };
-
-  const loadCartCount = async () => {
-    try {
-      const cart = await cartService.getCart(tenant?.id);
-      setCartItemCount(cart.length);
-    } catch (error) {
-      console.error("Failed to load cart count", error);
-    }
-  };
-
   const handleAddToCart = async () => {
-    if (!product) return;
+    if (!product || !tenant?.id) return;
 
     try {
-      await cartService.addToCart(product.id, 1, tenant?.id);
+      await cartService.addToCart(product.id, 1);
       setCartItemCount((prev) => prev + 1);
       toast({
         title: "Added to cart",
@@ -120,7 +110,7 @@ const ProductDetails = () => {
         <Header cartItems={[]} />
         <div className="container mx-auto px-4 py-20 text-center">
           <p className="text-muted-foreground mb-4">Product not found</p>
-          <Button onClick={() => navigate("/")}>
+          <Button onClick={() => navigate(buildRoute("/"))}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Shop
           </Button>

@@ -1,13 +1,20 @@
 import { useState } from "react";
 import { MapPin, Plus, Edit, Trash2, Check } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { AddressDto } from "@/types/dto";
 import { AddressDialog } from "./AddressDialog";
 import { useToast } from "@/hooks/use-toast";
 import { useTenant } from "@/hooks/useTenant";
-import { deleteAddress } from "@/services/profileService";
+import { profileService } from "@/services/profileService";
+import { useAuth } from "@/hooks/useAuth";
 
 interface AddressCardProps {
   addresses: AddressDto[];
@@ -20,6 +27,7 @@ export const AddressCard = ({ addresses, onUpdate }: AddressCardProps) => {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const { toast } = useToast();
   const { tenant } = useTenant();
+  const { user } = useAuth();
 
   const handleEdit = (address: AddressDto) => {
     setEditingAddress(address);
@@ -36,7 +44,7 @@ export const AddressCard = ({ addresses, onUpdate }: AddressCardProps) => {
 
     setDeletingId(addressId);
     try {
-      await deleteAddress(tenant.id, addressId);
+      await profileService.deleteAddress(user.id, addressId);
       toast({
         title: "Address deleted",
         description: "Address has been removed successfully",
@@ -92,13 +100,15 @@ export const AddressCard = ({ addresses, onUpdate }: AddressCardProps) => {
                     Default
                   </Badge>
                 )}
-                
+
                 <div className="space-y-2 mb-4">
                   <div className="flex items-center gap-2">
                     <p className="font-semibold">{address.label}</p>
                   </div>
                   <p className="text-sm">{address.fullName}</p>
-                  <p className="text-sm text-muted-foreground">{address.phone}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {address.phone}
+                  </p>
                   <p className="text-sm text-muted-foreground">
                     {address.addressLine1}
                     {address.addressLine2 && `, ${address.addressLine2}`}
@@ -135,7 +145,9 @@ export const AddressCard = ({ addresses, onUpdate }: AddressCardProps) => {
             {addresses.length === 0 && (
               <div className="col-span-2 flex flex-col items-center justify-center py-8 text-center">
                 <MapPin className="h-12 w-12 text-muted-foreground mb-3" />
-                <p className="text-sm text-muted-foreground">No addresses saved</p>
+                <p className="text-sm text-muted-foreground">
+                  No addresses saved
+                </p>
                 <Button variant="link" className="mt-2" onClick={handleAdd}>
                   Add your first address
                 </Button>

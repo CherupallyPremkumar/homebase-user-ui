@@ -1,58 +1,74 @@
 import { ProductDto } from "@/types/dto";
+import { getTenantId, API_ENDPOINTS, buildUrl, getFetchOptions, handleApiError } from "@/config/api";
 
-// Use environment variable for API base URL
-const API_BASE_URL = process.env.API_BASE_URL || "/api";
-
-const fetchWithErrorHandling = async (url: string, options: RequestInit) => {
-  const response = await fetch(url, options);
-  if (!response.ok) {
-    const errorMessage = await response.text();
-    console.error(`Error fetching ${url}: ${errorMessage}`);
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-  return response.json();
-};
+/**
+ * ✅ Production-Ready Product Service
+ * Uses getTenantId() dynamically instead of direct localStorage
+ * Includes consistent error handling and secure headers
+ */
 
 export const productService = {
+  /**
+   * GET /api/products
+   * Fetch all products for the current tenant
+   */
   getAllProducts: async (): Promise<ProductDto[]> => {
-    return fetchWithErrorHandling(`${API_BASE_URL}/products`, {
-      method: 'GET',
-      headers: {
-        'X-Tenant-ID': localStorage.getItem("X-Tenant-ID") || '',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem("authToken") || ''}`
-      },
-      credentials: 'include',
-    });
-  },
+    try {
+      const tenantId = getTenantId();
+      const url = buildUrl(API_ENDPOINTS.user.products, { tenantId });
+      const response = await fetch(url, getFetchOptions("GET"));
 
-  getProductById: async (id: number): Promise<ProductDto | null> => {
-    return fetchWithErrorHandling(`${API_BASE_URL}/products/${id}`, {
-      method: 'GET',
-      headers: {
-        'X-Tenant-ID': localStorage.getItem("X-Tenant-ID") || '',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem("authToken") || ''}`
-      },
-      credentials: 'include',
-    });
-  },
+      if (!response.ok) {
+        await handleApiError(response);
+      }
 
-  getProductsByCategory: async (category: string, tenantId?: string): Promise<ProductDto[]> => {
-    const url = new URL(`${API_BASE_URL}/products`);
-    url.searchParams.append('category', category);
-    if (tenantId) {
-      url.searchParams.append('tenantId', tenantId);
+      return await response.json();
+    } catch (error) {
+      console.error("❌ Failed to fetch products:", error);
+      throw new Error("Unable to load products. Please try again later.");
     }
+  },
 
-    return fetchWithErrorHandling(url.toString(), {
-      method: 'GET',
-      headers: {
-        'X-Tenant-ID': localStorage.getItem("X-Tenant-ID") || '',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem("authToken") || ''}`
-      },
-      credentials: 'include',
-    });
+  /**
+   * GET /api/products/{id}
+   * Fetch single product by ID
+   */
+  getProductById: async (id: number): Promise<ProductDto | null> => {
+    try {
+      const tenantId = getTenantId();
+      const url = buildUrl(`${API_ENDPOINTS.user.products}/${id}`, { tenantId });
+      const response = await fetch(url, getFetchOptions("GET"));
+
+      if (!response.ok) {
+        if (response.status === 404) return null;
+        await handleApiError(response);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error(`❌ Failed to fetch product ID ${id}:`, error);
+      throw new Error("Unable to fetch product details. Please try again.");
+    }
+  },
+
+  /**
+   * GET /api/products?category={category}
+   * Fetch products by category
+   */
+  getProductsByCategory: async (category: string): Promise<ProductDto[]> => {
+    try {
+      const tenantId = getTenantId();
+      const url = buildUrl(API_ENDPOINTS.user.products, { tenantId, category });
+      const response = await fetch(url, getFetchOptions("GET"));
+
+      if (!response.ok) {
+        await handleApiError(response);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error(`❌ Failed to fetch products for category ${category}:`, error);
+      throw new Error("Unable to load category products. Please try again later.");
+    }
   },
 };
