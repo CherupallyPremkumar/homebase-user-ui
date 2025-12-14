@@ -1,0 +1,129 @@
+// DTOs matching Spring Boot backend
+
+export interface ProductDto {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  imageUrl: string;
+  images?: string[]; // Multiple product images
+  category: string;
+  stock: number;
+  preparationTime?: number; // In days
+  isMadeToOrder?: boolean;
+  rating: number;
+  createdAt?: string;
+  discount?: number; // Percentage discount
+  onSale?: boolean; // Is on sale
+  inStock?: boolean; // Stock availability filter
+}
+
+export interface CartItemDto {
+  id: number;
+  productId: number;
+  productName: string;
+  productImage: string;
+  price: number;
+  quantity: number;
+  subtotal: number;
+}
+
+export interface CreatePaymentRequestDto {
+  amount: number;
+  currency: string;
+  orderId: string;
+  customerPhone: string;
+  customerName: string;
+  redirectUrl: string;
+  callbackUrl: string;
+}
+
+export interface CreatePaymentResponseDto {
+  success: boolean;
+  paymentUrl?: string;
+  transactionId?: string;
+  merchantTransactionId?: string;
+  message?: string;
+}
+
+export interface OrderItemDto {
+  productId: number;
+  productName: string;
+  productImage: string;
+  price: number;
+  quantity: number;
+  subtotal: number;
+}
+
+export enum OrderStatus {
+  PENDING = "PENDING",
+  CONFIRMED = "CONFIRMED",
+  PROCESSING = "PROCESSING",
+  SHIPPED = "SHIPPED",
+  DELIVERED = "DELIVERED",
+  CANCELLED = "CANCELLED",
+  PAYMENT_FAILED = "PAYMENT_FAILED"
+}
+
+export interface OrderDto {
+  id: string;
+  customerId?: number;
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
+  shippingAddress: string;
+  items: OrderItemDto[];
+  subtotal: number;
+  tax: number;
+  shippingCost: number;
+  total: number;
+  status: OrderStatus;
+  paymentStatus: string;
+  transactionId?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CheckoutFormData {
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
+  shippingAddress: string;
+  city: string;
+  state: string;
+  pincode: string;
+}
+
+export interface AddressDto {
+  id: string;
+  label: string;
+  fullName: string;
+  phone: string;
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  state: string;
+  pincode: string;
+  isDefault: boolean;
+}
+
+export interface CustomerProfileDto {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  addresses: AddressDto[];
+  notificationSettings: NotificationSettingsDto;
+  tenantId: string;
+}
+
+export interface NotificationSettingsDto {
+  orderUpdates: boolean;
+  promotions: boolean;
+  newsletter: boolean;
+}
+
+export interface UpdateProfileDto {
+  name: string;
+  phone?: string;
+}
