@@ -17,6 +17,7 @@ import PaymentFailed from "@/features/checkout/components/PaymentFailed";
 import MyOrders from "@/features/orders/components/MyOrders";
 import Profile from "@/features/profile/components/ProfilePage";
 import Login from "@/features/auth/components/LoginForm";
+import ApiTest from "@/pages/ApiTest";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
                 <Routes>
                   {/* Public routes */}
                   <Route path="/login" element={<Login />} />
+                  <Route path="/api-test" element={<ApiTest />} />
 
 
                   {/* Public browsing routes - no login required */}
