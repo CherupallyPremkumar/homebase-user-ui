@@ -64,6 +64,11 @@ This project is built with:
 
 Simply open [Lovable](https://lovable.dev/projects/b39f9783-7f77-46b1-a42e-a6496b060e04) and click on Share -> Publish.
 
+## Manual Deployment
+
+This project is configured for auto-deployment to GitHub Pages via GitHub Actions on the `main` and `v2` branches.
+Live URL: [https://web.premkumar.me](https://web.premkumar.me)
+
 ## Can I connect a custom domain to my Lovable project?
 
 Yes, you can!
