@@ -8,6 +8,7 @@ import { ProfileEditForm } from "./ProfileEditForm";
 import { OrderSummaryCard } from "./OrderSummaryCard";
 import { AddressCard } from "./AddressCard";
 import { NotificationSettings } from "./NotificationSettings";
+import { WishlistTab } from "./WishlistTab";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { getProfile } from "../services/profileService";
@@ -28,9 +29,10 @@ const Profile = () => {
     setIsLoading(true);
     try {
       const [profileData, ordersData] = await Promise.all([
-        getProfile(),
+        getProfile(user?.email),
         getOrders(),
       ]);
+
       setProfile(profileData);
       setOrders(ordersData);
     } catch (error) {
@@ -92,9 +94,10 @@ const Profile = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 h-auto">
+          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5 h-auto">
             <TabsTrigger value="overview" className="py-2">Overview</TabsTrigger>
             <TabsTrigger value="orders" className="py-2">Orders</TabsTrigger>
+            <TabsTrigger value="wishlist" className="py-2">Wishlist</TabsTrigger>
             <TabsTrigger value="addresses" className="py-2">Addresses</TabsTrigger>
             <TabsTrigger value="settings" className="py-2">Settings</TabsTrigger>
           </TabsList>
@@ -111,6 +114,10 @@ const Profile = () => {
 
           <TabsContent value="orders">
             <OrderSummaryCard orders={orders} />
+          </TabsContent>
+
+          <TabsContent value="wishlist">
+            <WishlistTab />
           </TabsContent>
 
           <TabsContent value="addresses">

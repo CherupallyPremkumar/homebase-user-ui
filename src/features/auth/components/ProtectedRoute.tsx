@@ -15,10 +15,14 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log("ProtectedRoute State:", { isLoading, isAuthenticated, path: window.location.pathname });
     if (!isLoading && !isAuthenticated) {
-      navigate("/login"), { replace: true };
+      console.log("Redirecting to login from ProtectedRoute");
+      // Redirect to home with login trigger and return URL
+      const returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
+      navigate(`/?login=true&returnUrl=${returnUrl}`, { replace: true });
     }
-  }, [isAuthenticated, isLoading, navigate, buildRoute]);
+  }, [isAuthenticated, isLoading, navigate]);
 
   if (isLoading) {
     return (

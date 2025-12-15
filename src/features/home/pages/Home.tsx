@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { ProductDto } from "@/types/dto";
 import { productService } from "@/features/products/services/productService";
+import { useProducts } from "@/hooks/api/useProducts";
 import { ProductCard } from "@/features/products/components/ProductCard";
 import { Header } from "@/components/shared/Header";
 import { useCart } from "@/hooks/useCart";
@@ -12,8 +13,7 @@ import { Link } from "react-router-dom";
 
 
 const Home = () => {
-  const [products, setProducts] = useState<ProductDto[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: products = [], isLoading: loading } = useProducts();
   const [currentSlide, setCurrentSlide] = useState(0);
   const { addToCart } = useCart();
 
@@ -35,9 +35,7 @@ const Home = () => {
     },
   ];
 
-  useEffect(() => {
-    loadProducts();
-  }, []);
+
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -46,20 +44,7 @@ const Home = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const loadProducts = async () => {
-    try {
-      const data = await productService.getAllProducts();
-      setProducts(data);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to load products",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+
 
   const handleAddToCart = async (productId: number) => {
     await addToCart(productId, 1);

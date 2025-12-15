@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams, useParams, Link } from "react-router-dom";
 import { ProductDto } from "@/types/dto";
 import { productService } from "@/features/products/services/productService";
+import { useProducts } from "@/hooks/api/useProducts";
 import { ProductCard } from "@/features/products/components/ProductCard";
 import { Header } from "@/components/shared/Header";
 import { useCart } from "@/hooks/useCart";
@@ -12,9 +13,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 const CategoryPage = () => {
     const [searchParams] = useSearchParams();
+    const { data: allProducts = [], isLoading } = useProducts();
     const [products, setProducts] = useState<ProductDto[]>([]);
     const [filteredProducts, setFilteredProducts] = useState<ProductDto[]>([]);
-    const [loading, setLoading] = useState(true);
+    // const [loading, setLoading] = useState(true); // Derived from query
     const { addToCart } = useCart();
 
     // Filter states
@@ -33,31 +35,26 @@ const CategoryPage = () => {
     const category = categoryId || "all";
 
     useEffect(() => {
-        loadProducts();
-    }, [category]);
+        if (!isLoading) {
+            const categoryFiltered = category === "all"
+                ? allProducts
+                : allProducts.filter(p => p.category.toLowerCase() === category.toLowerCase());
+
+            setProducts(categoryFiltered);
+            // setFilteredProducts(categoryFiltered); // Will be handled by applyFilters
+
+            if (categoryFiltered.length > 0) {
+                const prices = categoryFiltered.map(p => p.price);
+                setPriceRange([Math.min(...prices), Math.max(...prices)]);
+            }
+        }
+    }, [category, allProducts, isLoading]);
 
     useEffect(() => {
         applyFilters();
     }, [products, priceRange, selectedRatings, showMadeToOrder, showInStock, sortBy]);
 
-    const loadProducts = async () => {
-        try {
-            setLoading(true);
-            const data = await productService.getAllProducts();
-            const categoryFiltered = category === "all"
-                ? data
-                : data.filter(p => p.category.toLowerCase() === category.toLowerCase());
-            setProducts(categoryFiltered);
-            if (categoryFiltered.length > 0) {
-                const prices = categoryFiltered.map(p => p.price);
-                setPriceRange([Math.min(...prices), Math.max(...prices)]);
-            }
-        } catch (error) {
-            toast({ title: "Error", description: "Failed to load products", variant: "destructive" });
-        } finally {
-            setLoading(false);
-        }
-    };
+    // Removed loadProducts as it is replaced by useProducts and the effect above
 
     const applyFilters = () => {
         let filtered = [...products];
@@ -95,6 +92,17 @@ const CategoryPage = () => {
     };
 
     const hasActiveFilters = selectedRatings.length > 0 || showMadeToOrder || showInStock;
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-gray-50">
+                <Header />
+                <div className="container mx-auto px-4 py-6 flex justify-center items-center h-[calc(100vh-100px)]">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -192,7 +200,7 @@ const CategoryPage = () => {
                             </h2>
                         </div>
 
-                        {loading ? (
+                        {isLoading ? (
                             <div className="flex justify-center items-center py-20">
                                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
                             </div>

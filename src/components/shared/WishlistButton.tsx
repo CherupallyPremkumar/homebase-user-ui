@@ -3,6 +3,8 @@ import { Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { toggleWishlist as toggleWishlistApi, getWishlist as getWishlistApi } from "@/features/profile/services/wishlistService";
 
 interface WishlistButtonProps {
   productId: number;
@@ -21,41 +23,77 @@ export const WishlistButton = ({
   showLabel = false,
   className,
 }: WishlistButtonProps) => {
+  const { user } = useAuth();
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
-    // Load wishlist from localStorage
-    const wishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
-    setIsInWishlist(wishlist.includes(productId));
-  }, [productId]);
+    const checkStatus = async () => {
+      if (user) {
+        // API Check
+        try {
+          const items = await getWishlistApi(user.email);
+          const exists = items.some(p => p.id === productId);
+          setIsInWishlist(exists);
+        } catch (e) { console.error(e); }
+      } else {
+        // LocalStorage Check
+        const wishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
+        setIsInWishlist(wishlist.includes(productId));
+      }
+    };
+    checkStatus();
+  }, [productId, user]);
 
-  const toggleWishlist = (e: React.MouseEvent) => {
+  const toggleWishlist = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
-    const wishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
-    
-    if (isInWishlist) {
-      // Remove from wishlist
-      const updated = wishlist.filter((id: number) => id !== productId);
-      localStorage.setItem("wishlist", JSON.stringify(updated));
-      setIsInWishlist(false);
-      toast({
-        title: "Removed from wishlist",
-        description: `${productName} has been removed from your wishlist`,
-      });
+    if (user) {
+      // API Toggle
+      try {
+        const response = await toggleWishlistApi(user.email, productId);
+        setIsInWishlist(response.added);
+        if (response.added) {
+          setIsAnimating(true);
+          setTimeout(() => setIsAnimating(false), 600);
+        }
+        toast({
+          title: response.added ? "Added to wishlist" : "Removed from wishlist",
+          description: response.message,
+        });
+
+        // Dispatch storage event to update other components? 
+        // Or we need a context. For now, we rely on page refresh for others or local state here.
+        // Actually, trigger a custom event for the hook to pick up?
+        window.dispatchEvent(new Event("wishlist-updated"));
+      } catch (err) {
+        toast({ title: "Error", description: "Failed to update wishlist", variant: "destructive" });
+      }
     } else {
-      // Add to wishlist
-      const updated = [...wishlist, productId];
-      localStorage.setItem("wishlist", JSON.stringify(updated));
-      setIsInWishlist(true);
-      setIsAnimating(true);
-      setTimeout(() => setIsAnimating(false), 600);
-      toast({
-        title: "Added to wishlist",
-        description: `${productName} has been added to your wishlist`,
-      });
+      // LocalStorage Toggle
+      const wishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
+
+      if (isInWishlist) {
+        const updated = wishlist.filter((id: number) => id !== productId);
+        localStorage.setItem("wishlist", JSON.stringify(updated));
+        setIsInWishlist(false);
+        toast({
+          title: "Removed from wishlist",
+          description: `${productName} has been removed from your wishlist`,
+        });
+      } else {
+        const updated = [...wishlist, productId];
+        localStorage.setItem("wishlist", JSON.stringify(updated));
+        setIsInWishlist(true);
+        setIsAnimating(true);
+        setTimeout(() => setIsAnimating(false), 600);
+        toast({
+          title: "Added to wishlist",
+          description: `${productName} has been added to your wishlist`,
+        });
+      }
+      window.dispatchEvent(new Event("storage"));
     }
   };
 
@@ -101,20 +139,34 @@ export const WishlistButton = ({
 
 // Hook to get wishlist items
 export const useWishlist = () => {
+  const { user } = useAuth();
   const [wishlistIds, setWishlistIds] = useState<number[]>([]);
 
   useEffect(() => {
-    const loadWishlist = () => {
-      const wishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
-      setWishlistIds(wishlist);
+    const loadWishlist = async () => {
+      if (user) {
+        try {
+          const items = await getWishlistApi(user.email);
+          setWishlistIds(items.map(p => p.id));
+        } catch (e) {
+          console.error("Failed to load wishlist", e);
+        }
+      } else {
+        const wishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
+        setWishlistIds(wishlist);
+      }
     };
 
     loadWishlist();
-    
-    // Listen for storage changes
+
+    // Listen for storage changes & custom event
     window.addEventListener("storage", loadWishlist);
-    return () => window.removeEventListener("storage", loadWishlist);
-  }, []);
+    window.addEventListener("wishlist-updated", loadWishlist);
+    return () => {
+      window.removeEventListener("storage", loadWishlist);
+      window.removeEventListener("wishlist-updated", loadWishlist);
+    };
+  }, [user]);
 
   return wishlistIds;
 };

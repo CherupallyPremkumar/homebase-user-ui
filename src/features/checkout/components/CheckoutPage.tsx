@@ -14,13 +14,15 @@ import { PaymentMethodSelector, type PaymentMethodType, paymentMethods } from ".
 import { ShippingCalculator } from "./ShippingCalculator";
 import { toast } from "@/hooks/use-toast";
 import { Loader2, CreditCard } from "lucide-react";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 const Checkout = () => {
   const navigate = useNavigate();
   const { cartItems, loading } = useCart();
   const [processing, setProcessing] = useState(false);
-  const [shippingCost, setShippingCost] = useState(5000);
+  const [shippingCost, setShippingCost] = useState(0); // Set by backend now
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodType>("card");
+  const [checkoutTotals, setCheckoutTotals] = useState<any>(null); // Backend preview data
   const [formData, setFormData] = useState<CheckoutFormData>({
     customerName: "",
     customerEmail: "",
@@ -31,23 +33,46 @@ const Checkout = () => {
     pincode: "",
   });
 
+  const { user } = useAuth(); // Get authenticated user
+
   useEffect(() => {
     if (!loading && cartItems.length === 0) {
       navigate("/cart");
+    } else if (cartItems.length > 0) {
+      // Fetch backend calculation
+      orderService.previewOrder(cartItems)
+        .then(data => setCheckoutTotals(data))
+        .catch(err => toast({ title: "Error", description: "Failed to load pricing", variant: "destructive" }));
     }
   }, [loading, cartItems, navigate]);
+
+  // Pre-fill user data
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        customerName: user.name || "",
+        customerEmail: user.email || ""
+      }));
+    }
+  }, [user]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const subtotal = cartItems.reduce((sum, item) => sum + item.subtotal, 0);
-  const tax = Math.round(subtotal * 0.18);
+  // Fallback to local if loading (display 0 or spinner)
+  const subtotal = checkoutTotals ? checkoutTotals.subtotal / 100 : 0;
+  const tax = checkoutTotals ? checkoutTotals.tax / 100 : 0;
+  const backendShipping = checkoutTotals ? checkoutTotals.shipping / 100 : 0;
+
+  // Payment fee calculation (Frontend addition)
   const selectedPaymentMethod = paymentMethods.find(m => m.id === paymentMethod);
-  const processingFee = selectedPaymentMethod?.processingFee
-    ? Math.round((subtotal + tax + shippingCost) * (selectedPaymentMethod.processingFee / 100))
+  const processingFee = (selectedPaymentMethod?.processingFee && checkoutTotals)
+    ? Math.round((checkoutTotals.total / 100) * (selectedPaymentMethod.processingFee / 100))
     : 0;
-  const total = subtotal + tax + shippingCost + processingFee;
+
+  const total = checkoutTotals ? (checkoutTotals.total / 100) + processingFee : 0;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,6 +92,7 @@ const Checkout = () => {
     setProcessing(true);
 
     try {
+      // Backend will re-calculate, so simple fields are fine
       const order = await orderService.createOrder({
         customerName: formData.customerName,
         customerEmail: formData.customerEmail,
@@ -80,14 +106,15 @@ const Checkout = () => {
           quantity: item.quantity,
           subtotal: item.subtotal,
         })),
-        subtotal,
-        tax,
-        shippingCost,
-        total,
+        // These are ignored by backend now, but good to send
+        subtotal: subtotal * 100,
+        tax: tax * 100,
+        shippingCost: backendShipping * 100,
+        total: total * 100,
       });
 
       const paymentRequest = {
-        amount: total,
+        amount: Math.round(total * 100), // Ensure cents
         currency: "INR",
         orderId: order.id,
         customerPhone: `+91${formData.customerPhone}`,
@@ -104,17 +131,21 @@ const Checkout = () => {
         throw new Error(paymentResponse.message || "Payment initiation failed");
       }
     } catch (error) {
+      console.error(error);
       toast({ title: "Error", description: "Failed to process order. Please try again.", variant: "destructive" });
       setProcessing(false);
     }
   };
 
-  if (loading) {
+  if (loading || !checkoutTotals) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
         <div className="flex justify-center items-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-muted-foreground">Calculating best prices...</p>
+          </div>
         </div>
       </div>
     );
@@ -173,7 +204,6 @@ const Checkout = () => {
               </Card>
 
               <PaymentMethodSelector selected={paymentMethod} onSelect={setPaymentMethod} />
-              <ShippingCalculator cartTotal={subtotal} onShippingSelect={setShippingCost} />
             </div>
 
             <div className="lg:col-span-1">
@@ -181,7 +211,7 @@ const Checkout = () => {
                 <h2 className="text-xl font-display font-bold text-foreground">Order Summary</h2>
                 <Separator />
                 <div className="space-y-3 max-h-60 overflow-y-auto">
-                  {cartItems.map((item) => (
+                  {checkoutTotals.items.map((item: any) => (
                     <div key={item.id} className="flex gap-3">
                       <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-md bg-muted">
                         <img src={item.productImage} alt={item.productName} className="h-full w-full object-cover" />
@@ -190,25 +220,29 @@ const Checkout = () => {
                         <p className="text-sm font-medium text-foreground truncate">{item.productName}</p>
                         <p className="text-sm text-muted-foreground">Qty: {item.quantity}</p>
                       </div>
+                      {/* Backend items might not have subtotal in cents correctly if not populated? 
+                          Actually controller populates items list in DTO with original items.
+                          So use item subtotal from props or just calculate display?
+                          Original items have subtotal. */}
                       <p className="text-sm font-medium">₹{(item.subtotal / 100).toFixed(2)}</p>
                     </div>
                   ))}
                 </div>
                 <Separator />
                 <div className="space-y-2">
-                  <div className="flex justify-between text-sm"><span className="text-muted-foreground">Subtotal</span><span>₹{(subtotal / 100).toFixed(2)}</span></div>
-                  <div className="flex justify-between text-sm"><span className="text-muted-foreground">Tax (GST 18%)</span><span>₹{(tax / 100).toFixed(2)}</span></div>
-                  <div className="flex justify-between text-sm"><span className="text-muted-foreground">Shipping</span><span>{shippingCost === 0 ? "FREE" : `₹${(shippingCost / 100).toFixed(2)}`}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-muted-foreground">Subtotal</span><span>₹{subtotal.toFixed(2)}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-muted-foreground">Tax (GST 18%)</span><span>₹{tax.toFixed(2)}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-muted-foreground">Shipping</span><span>{backendShipping === 0 ? "FREE" : `₹${backendShipping.toFixed(2)}`}</span></div>
                   {processingFee > 0 && (
-                    <div className="flex justify-between text-sm"><span className="text-muted-foreground">Processing Fee</span><span>₹{(processingFee / 100).toFixed(2)}</span></div>
+                    <div className="flex justify-between text-sm"><span className="text-muted-foreground">Processing Fee</span><span>₹{processingFee.toFixed(2)}</span></div>
                   )}
                 </div>
                 <Separator />
                 <div className="flex justify-between text-lg font-display font-bold">
-                  <span>Total</span><span className="text-primary">₹{(total / 100).toFixed(2)}</span>
+                  <span>Total</span><span className="text-primary">₹{total.toFixed(2)}</span>
                 </div>
                 <Button type="submit" size="lg" className="w-full gap-2" disabled={processing}>
-                  {processing ? (<><Loader2 className="h-4 w-4 animate-spin" />Processing...</>) : (<><CreditCard className="h-4 w-4" />Pay with PhonePe</>)}
+                  {processing ? (<><Loader2 className="h-4 w-4 animate-spin" />Processing...</>) : (<><CreditCard className="h-4 w-4" />Pay Securely</>)}
                 </Button>
                 <p className="text-xs text-center text-muted-foreground">Secure payment powered by PhonePe</p>
               </Card>

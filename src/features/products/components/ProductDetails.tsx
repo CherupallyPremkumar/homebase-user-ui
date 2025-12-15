@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ProductDto } from "@/types/dto";
-import { productService } from "../services/productService";
+// import { productService } from "../services/productService";
+import { useProduct, useProducts } from "@/hooks/api/useProducts";
 import { Header } from "@/components/shared/Header";
 import { useCart } from "@/hooks/useCart";
 import { Button } from "@/components/ui/button";
@@ -23,45 +24,25 @@ import QuickViewModal from "./QuickViewModal";
 const ProductDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [product, setProduct] = useState<ProductDto | null>(null);
-  const [allProducts, setAllProducts] = useState<ProductDto[]>([]);
-  const [loading, setLoading] = useState(true);
+  const productId = id ? parseInt(id) : 0;
+
+  const { data: product, isLoading: loadingProduct } = useProduct(productId);
+  const { data: allProducts = [] } = useProducts();
+
+  const loading = loadingProduct; // For compatibility
+
   const [quantity, setQuantity] = useState(1);
   const [selectedProduct, setSelectedProduct] = useState<ProductDto | null>(null);
   const [quickViewOpen, setQuickViewOpen] = useState(false);
   const { addToCart } = useCart();
 
   useEffect(() => {
-    if (id) {
-      loadProduct(parseInt(id));
-      loadAllProducts();
+    if (product) {
+      addToRecentlyViewed(product);
     }
-  }, [id]);
+  }, [product]);
 
-  const loadProduct = async (productId: number) => {
-    try {
-      const data = await productService.getProductById(productId);
-      setProduct(data);
-      if (data) addToRecentlyViewed(data);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to load product details",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadAllProducts = async () => {
-    try {
-      const data = await productService.getAllProducts();
-      setAllProducts(data);
-    } catch (error) {
-      console.error("Failed to load products", error);
-    }
-  };
+  // Removed manual loadProduct and loadAllProducts functions as they are replaced by hooks
 
   const handleAddToCart = async () => {
     if (!product) return;

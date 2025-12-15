@@ -132,3 +132,12 @@ export interface UpdateProfileDto {
   name: string;
   phone?: string;
 }
+
+export interface CheckoutPreviewDto {
+  items: CartItemDto[];
+  subtotal: number;
+  tax: number;
+  shipping: number;
+  total: number;
+  currency: string;
+}

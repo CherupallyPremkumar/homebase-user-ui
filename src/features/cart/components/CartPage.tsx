@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/shared/Header";
 import { useCart } from "@/hooks/useCart";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { LoginDialog } from "@/features/auth/components/LoginDialog";
 import { CartItemCard } from "./CartItemCard";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -12,6 +14,16 @@ import { Loader2, ShoppingBag, ArrowRight } from "lucide-react";
 const Cart = () => {
   const navigate = useNavigate();
   const { cartItems, loading, updateQuantity, removeItem } = useCart();
+  const { user } = useAuth();
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+
+  const handleCheckout = () => {
+    if (user) {
+      navigate("/checkout");
+    } else {
+      setIsLoginOpen(true);
+    }
+  };
 
   const handleUpdateQuantity = async (itemId: number, quantity: number) => {
     await updateQuantity(itemId, quantity);
@@ -20,6 +32,8 @@ const Cart = () => {
   const handleRemoveItem = async (itemId: number) => {
     await removeItem(itemId);
   };
+
+  // ... existing code ...
 
   const subtotal = cartItems.reduce((sum, item) => sum + item.subtotal, 0);
   const tax = Math.round(subtotal * 0.18); // 18% GST
@@ -119,7 +133,7 @@ const Cart = () => {
               <Button
                 size="lg"
                 className="w-full gap-2"
-                onClick={() => navigate("/checkout")}
+                onClick={handleCheckout}
               >
                 Proceed to Checkout
                 <ArrowRight className="h-4 w-4" />
@@ -128,6 +142,12 @@ const Cart = () => {
           </div>
         </div>
       </main>
+
+      <LoginDialog
+        open={isLoginOpen}
+        onOpenChange={setIsLoginOpen}
+        onLoginSuccess={() => navigate("/checkout")}
+      />
     </div>
   );
 };

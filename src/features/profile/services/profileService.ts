@@ -36,8 +36,12 @@ const mockProfile: CustomerProfileDto = {
 /**
  * Get customer profile
  */
-export const getProfile = async (): Promise<CustomerProfileDto> => {
-  const response = await fetch(`${API_BASE_URL}/customer/profile`);
+export const getProfile = async (email?: string): Promise<CustomerProfileDto> => {
+  const url = email
+    ? `${API_BASE_URL}/customer/profile?email=${encodeURIComponent(email)}`
+    : `${API_BASE_URL}/customer/profile`;
+
+  const response = await fetch(url);
   if (!response.ok) throw new Error("Failed to fetch profile");
   return response.json();
 };

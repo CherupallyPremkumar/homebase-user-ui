@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
+import * as authService from "../services/authService";
 
 export interface AuthUser {
   id: string;
@@ -12,6 +13,8 @@ export interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
+  socialLogin: (provider: string) => Promise<void>; // Simulated
+  googleLogin: (code: string) => Promise<void>; // Real
   logout: () => void;
   getAuthToken: () => string | null;
 }
@@ -21,6 +24,8 @@ export const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   isLoading: true,
   login: async () => { },
+  socialLogin: async () => { },
+  googleLogin: async () => { },
   logout: () => { },
   getAuthToken: () => null,
 });
@@ -55,36 +60,54 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }, []);
 
   const login = async (email: string, password: string, rememberMe: boolean = false) => {
-    // TODO: Replace with actual API call
-    // const response = await authService.login(email, password);
+    // Call the actual auth service
+    const response = await authService.login(email, password);
 
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    // Mock validation
-    if (!email || !password) {
-      throw new Error("Email and password are required");
-    }
-
-    if (password.length < 6) {
-      throw new Error("Invalid email or password");
-    }
-
-    // Mock user and token
-    const mockUser: AuthUser = {
-      id: "user_" + Math.random().toString(36).substr(2, 9),
-      email,
-      name: email.split("@")[0],
+    // Mock/Service User Logic
+    const authUser: AuthUser = {
+      id: response.user.id,
+      email: response.user.email,
+      name: response.user.name,
     };
-
-    const mockToken = "mock_token_" + Math.random().toString(36).substr(2, 16);
 
     // Store in localStorage or sessionStorage based on rememberMe
     const storage = rememberMe ? localStorage : sessionStorage;
-    storage.setItem("auth_user", JSON.stringify(mockUser));
-    storage.setItem("auth_token", mockToken);
+    storage.setItem("auth_user", JSON.stringify(authUser));
+    storage.setItem("auth_token", response.token);
 
-    setUser(mockUser);
+    setUser(authUser);
+  };
+
+  const socialLogin = async (provider: string) => {
+    const response = await authService.socialLogin(provider);
+
+    const authUser: AuthUser = {
+      id: response.user.id,
+      email: response.user.email,
+      name: response.user.name,
+    };
+
+    // Always store social login in local storage for now (or session)
+    localStorage.setItem("auth_user", JSON.stringify(authUser));
+    localStorage.setItem("auth_token", response.token);
+
+    setUser(authUser);
+  };
+
+  const googleLogin = async (code: string) => {
+    const response = await authService.googleLogin(code);
+
+    const authUser: AuthUser = {
+      id: response.user.id,
+      email: response.user.email,
+      name: response.user.name,
+    };
+
+    // Store session
+    localStorage.setItem("auth_user", JSON.stringify(authUser));
+    localStorage.setItem("auth_token", response.token);
+
+    setUser(authUser);
   };
 
   const logout = () => {
@@ -93,7 +116,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     sessionStorage.removeItem("auth_user");
     sessionStorage.removeItem("auth_token");
     setUser(null);
-    navigate("/login");
+    navigate("/");
   };
 
   const getAuthToken = (): string | null => {
@@ -107,6 +130,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         isAuthenticated: !!user,
         isLoading,
         login,
+        socialLogin,
+        googleLogin,
         logout,
         getAuthToken,
       }}

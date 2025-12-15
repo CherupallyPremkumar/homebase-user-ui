@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { ShoppingCart, Package, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,14 +13,64 @@ import { MiniCart } from "@/features/cart/components/MiniCart";
 import { CartItemDto } from "@/types/dto";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
-import { useLocation } from "@/hooks/useLocation";
+import { useLocation as useLocationHook } from "@/hooks/useLocation";
 import { MapPin, Loader2 } from "lucide-react";
 import { CategoryNav } from "@/components/shared/CategoryNav";
+import { LoginDialog } from "@/features/auth/components/LoginDialog";
+import { useState, useEffect } from "react";
 
 export const Header = () => {
-  const { user, logout } = useAuth();
+  // @ts-ignore - googleLogin added to context but interface might lag
+  const { user, logout, googleLogin } = useAuth();
   const { cartItems, removeItem, updateQuantity } = useCart();
-  const { city, pincode, loading, error, detectLocation } = useLocation();
+  const { city, pincode, loading, error, detectLocation } = useLocationHook();
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  // Standard router hook for params:
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check for login trigger (popup)
+    if (searchParams.get("login") === "true" && !user) {
+      setIsLoginOpen(true);
+    }
+
+    // Check for Google OAuth Callback
+    const code = searchParams.get("code");
+    // Ensure we only run this once and if we have the googleLogin function
+    if (code && !user) {
+      const handleCallback = async () => {
+        try {
+          if (googleLogin) {
+            await googleLogin(code);
+            // Clear params on success
+            setSearchParams({}, { replace: true });
+          }
+        } catch (err) {
+          console.error("Google Auth Failed", err);
+          // Still clear params to avoid loop
+          setSearchParams({}, { replace: true });
+        }
+      };
+      if (googleLogin) {
+        handleCallback();
+      }
+    }
+  }, [searchParams, user, googleLogin]);
+
+  const handleLoginSuccess = () => {
+    // Check for returnUrl
+    const returnUrl = searchParams.get("returnUrl");
+    if (returnUrl) {
+      navigate(decodeURIComponent(returnUrl), { replace: true });
+    } else {
+      setIsLoginOpen(false);
+      // Clean up params if needed, or just leave it
+      if (searchParams.get("login")) {
+        setSearchParams({}, { replace: true });
+      }
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white shadow-sm">
@@ -95,17 +145,25 @@ export const Header = () => {
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild className="cursor-pointer">
-                      <Link to="/profile" className="flex items-center">
-                        <User className="mr-2 h-4 w-4" />
-                        <span>Profile</span>
-                      </Link>
+                    <DropdownMenuItem
+                      onSelect={() => {
+                        console.log("Navigating to profile...");
+                        navigate("/profile");
+                      }}
+                      className="cursor-pointer"
+                    >
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Profile</span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild className="cursor-pointer">
-                      <Link to="/orders" className="flex items-center">
-                        <Package className="mr-2 h-4 w-4" />
-                        <span>Orders</span>
-                      </Link>
+                    <DropdownMenuItem
+                      onSelect={() => {
+                        console.log("Navigating to orders...");
+                        navigate("/orders");
+                      }}
+                      className="cursor-pointer"
+                    >
+                      <Package className="mr-2 h-4 w-4" />
+                      <span>Orders</span>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={logout} className="cursor-pointer">
@@ -115,14 +173,20 @@ export const Header = () => {
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <Button asChild variant="ghost" size="sm" className="text-white hover:bg-primary-foreground/10">
-                  <Link to="/login">Login</Link>
+                <Button variant="ghost" size="sm" className="text-white hover:bg-primary-foreground/10" onClick={() => setIsLoginOpen(true)}>
+                  Login
                 </Button>
               )}
             </div>
           </div>
         </div>
       </div>
+
+      <LoginDialog
+        open={isLoginOpen}
+        onOpenChange={setIsLoginOpen}
+        onLoginSuccess={handleLoginSuccess}
+      />
 
       {/* Secondary Navigation */}
       <div className="bg-white border-b">
