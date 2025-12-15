@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/sheet";
 import { CartItemDto } from "@/types/dto";
 import { Link } from "react-router-dom";
-import { useTenant } from "@/hooks/useTenant";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface MiniCartProps {
@@ -23,7 +22,6 @@ interface MiniCartProps {
 }
 
 export const MiniCart = ({ items, onRemoveItem, onUpdateQuantity }: MiniCartProps) => {
-  const { buildRoute } = useTenant();
   const [open, setOpen] = useState(false);
 
   const subtotal = items.reduce((sum, item) => sum + item.subtotal, 0);
@@ -35,7 +33,7 @@ export const MiniCart = ({ items, onRemoveItem, onUpdateQuantity }: MiniCartProp
         <Button variant="outline" size="icon" className="relative hover:shadow-md">
           <ShoppingCart className="h-5 w-5" />
           {itemCount > 0 && (
-            <Badge 
+            <Badge
               className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 gradient-primary text-primary-foreground shadow-md"
             >
               {itemCount}
@@ -75,7 +73,7 @@ export const MiniCart = ({ items, onRemoveItem, onUpdateQuantity }: MiniCartProp
                         className="h-full w-full object-cover"
                       />
                     </div>
-                    
+
                     <div className="flex-1 space-y-2">
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
@@ -95,7 +93,7 @@ export const MiniCart = ({ items, onRemoveItem, onUpdateQuantity }: MiniCartProp
                           <X className="h-4 w-4" />
                         </Button>
                       </div>
-                      
+
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1 border border-border rounded">
                           <Button
@@ -119,7 +117,7 @@ export const MiniCart = ({ items, onRemoveItem, onUpdateQuantity }: MiniCartProp
                             +
                           </Button>
                         </div>
-                        
+
                         <p className="font-semibold text-sm">
                           ₹{(item.subtotal / 100).toFixed(2)}
                         </p>
@@ -135,16 +133,16 @@ export const MiniCart = ({ items, onRemoveItem, onUpdateQuantity }: MiniCartProp
                 <span>Subtotal:</span>
                 <span className="text-primary">₹{(subtotal / 100).toFixed(2)}</span>
               </div>
-              
+
               <Separator />
-              
+
               <div className="space-y-2">
-                <Link to={buildRoute("/cart")} className="block" onClick={() => setOpen(false)}>
+                <Link to="/cart" className="block" onClick={() => setOpen(false)}>
                   <Button variant="outline" className="w-full">
                     View Cart
                   </Button>
                 </Link>
-                <Link to={buildRoute("/checkout")} className="block" onClick={() => setOpen(false)}>
+                <Link to="/checkout" className="block" onClick={() => setOpen(false)}>
                   <Button className="w-full gap-2">
                     Checkout
                     <ArrowRight className="h-4 w-4" />

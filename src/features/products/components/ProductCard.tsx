@@ -3,9 +3,7 @@ import { ProductDto } from "@/types/dto";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useTenant } from "@/hooks/useTenant";
 import { ShoppingCart, Star, Eye, Package } from "lucide-react";
-import { ProductLayoutType } from "@/types/tenant";
 import { ProductBadge, getProductBadges } from "./ProductBadge";
 import { WishlistButton } from "@/components/shared/WishlistButton";
 import { QuantitySelector } from "@/components/shared/QuantitySelector";
@@ -17,11 +15,10 @@ interface ProductCardProps {
   product: ProductDto;
   onAddToCart?: (productId: number) => void;
   onQuickView?: (product: ProductDto) => void;
-  layout?: ProductLayoutType;
+  layout?: "grid" | "list" | "masonry";
 }
 
 export const ProductCard = ({ product, onAddToCart, onQuickView, layout = "grid" }: ProductCardProps) => {
-  const { buildRoute } = useTenant();
   const [quantity, setQuantity] = useState(1);
   const isOutOfStock = product.stock === 0;
   const isLowStock = product.stock > 0 && product.stock <= 5;
@@ -42,7 +39,7 @@ export const ProductCard = ({ product, onAddToCart, onQuickView, layout = "grid"
     return (
       <Card className="overflow-hidden hover-lift group bg-card border-border shadow-sm">
         <div className="flex flex-col sm:flex-row gap-4">
-          <Link to={buildRoute(`/product/${product.id}`)} className="flex-shrink-0">
+          <Link to={`/product/${product.id}`} className="flex-shrink-0">
             <div className="w-full sm:w-48 h-48 overflow-hidden bg-muted relative">
               <img
                 src={product.imageUrl}
@@ -55,7 +52,7 @@ export const ProductCard = ({ product, onAddToCart, onQuickView, layout = "grid"
 
           <div className="p-4 flex-1 flex flex-col justify-between">
             <div className="space-y-2">
-              <Link to={buildRoute(`/product/${product.id}`)}>
+              <Link to={`/product/${product.id}`}>
                 <h3 className="font-display font-semibold text-lg text-foreground hover:text-primary transition-base">
                   {product.name}
                 </h3>
@@ -106,7 +103,7 @@ export const ProductCard = ({ product, onAddToCart, onQuickView, layout = "grid"
   if (layout === "masonry") {
     return (
       <Card className="overflow-hidden hover-lift group break-inside-avoid mb-4 bg-card border-border shadow-sm">
-        <Link to={buildRoute(`/product/${product.id}`)}>
+        <Link to={`/product/${product.id}`}>
           <div className="w-full overflow-hidden bg-muted relative" style={{ aspectRatio: Math.random() > 0.5 ? '3/4' : '4/3' }}>
             <img
               src={product.imageUrl}
@@ -119,7 +116,7 @@ export const ProductCard = ({ product, onAddToCart, onQuickView, layout = "grid"
 
         <div className="p-4 space-y-3">
           <div className="space-y-1">
-            <Link to={buildRoute(`/product/${product.id}`)}>
+            <Link to={`/product/${product.id}`}>
               <h3 className="font-display font-semibold text-base text-foreground hover:text-primary transition-base line-clamp-2">
                 {product.name}
               </h3>
@@ -168,7 +165,7 @@ export const ProductCard = ({ product, onAddToCart, onQuickView, layout = "grid"
   // Default grid layout - e-commerce style
   return (
     <div className="group relative bg-white rounded border border-border hover:shadow-lg transition-shadow duration-200">
-      <Link to={buildRoute(`/product/${product.id}`)} className="block">
+      <Link to={`/product/${product.id}`} className="block">
         {/* Image Container */}
         <div className="relative aspect-square overflow-hidden bg-gray-50">
           <img
@@ -196,7 +193,7 @@ export const ProductCard = ({ product, onAddToCart, onQuickView, layout = "grid"
 
       {/* Product Info */}
       <div className="p-3 space-y-2">
-        <Link to={buildRoute(`/product/${product.id}`)}>
+        <Link to={`/product/${product.id}`}>
           <h3 className="text-sm font-medium text-foreground line-clamp-2 hover:text-primary transition-colors min-h-[40px]">
             {product.name}
           </h3>

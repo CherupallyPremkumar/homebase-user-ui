@@ -2,15 +2,14 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ProductDto } from "@/types/dto";
 import { productService } from "../services/productService";
-import { cartService } from "@/features/cart/services/cartService";
 import { Header } from "@/components/shared/Header";
+import { useCart } from "@/hooks/useCart";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ProductBadge, getProductBadges } from "./ProductBadge";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/hooks/use-toast";
-import { useTenant } from "@/hooks/useTenant";
-import { ShoppingCart, ArrowLeft, Loader2, Package, Clock } from "lucide-react";
+import { ShoppingCart, ArrowLeft, Loader2, Clock, Star, MapPin, BadgeCheck } from "lucide-react";
 import { ProductImageCarousel } from "./ProductImageCarousel";
 import { AnimatedRating } from "@/components/shared/AnimatedRating";
 import { ProductReviews } from "./ProductReviews";
@@ -24,30 +23,26 @@ import QuickViewModal from "./QuickViewModal";
 const ProductDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { tenant, buildRoute } = useTenant();
   const [product, setProduct] = useState<ProductDto | null>(null);
   const [allProducts, setAllProducts] = useState<ProductDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
-  const [cartItemCount, setCartItemCount] = useState(0);
   const [selectedProduct, setSelectedProduct] = useState<ProductDto | null>(null);
   const [quickViewOpen, setQuickViewOpen] = useState(false);
+  const { addToCart } = useCart();
 
   useEffect(() => {
-    if (id && tenant) {
+    if (id) {
       loadProduct(parseInt(id));
       loadAllProducts();
-      loadCartCount();
     }
-  }, [id, tenant]);
+  }, [id]);
 
   const loadProduct = async (productId: number) => {
     try {
-      const data = await productService.getProductById(productId, tenant?.id);
+      const data = await productService.getProductById(productId);
       setProduct(data);
-
-      // Add to recently viewed
-      addToRecentlyViewed(data);
+      if (data) addToRecentlyViewed(data);
     } catch (error) {
       toast({
         title: "Error",
@@ -61,39 +56,16 @@ const ProductDetails = () => {
 
   const loadAllProducts = async () => {
     try {
-      const data = await productService.getAllProducts(tenant?.id);
+      const data = await productService.getAllProducts();
       setAllProducts(data);
     } catch (error) {
       console.error("Failed to load products", error);
     }
   };
 
-  const loadCartCount = async () => {
-    try {
-      const cart = await cartService.getCart(tenant?.id);
-      setCartItemCount(cart.length);
-    } catch (error) {
-      console.error("Failed to load cart count", error);
-    }
-  };
-
   const handleAddToCart = async () => {
     if (!product) return;
-
-    try {
-      await cartService.addToCart(product.id, 1, tenant?.id);
-      setCartItemCount((prev) => prev + 1);
-      toast({
-        title: "Added to cart",
-        description: "Product has been added to your cart",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to add product to cart",
-        variant: "destructive",
-      });
-    }
+    await addToCart(product.id, quantity);
   };
 
   const handleQuickView = (product: ProductDto) => {
@@ -104,7 +76,7 @@ const ProductDetails = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <Header cartItems={[]} />
+        <Header />
         <div className="flex justify-center items-center py-20">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
@@ -115,7 +87,7 @@ const ProductDetails = () => {
   if (!product) {
     return (
       <div className="min-h-screen bg-background">
-        <Header cartItems={[]} />
+        <Header />
         <div className="container mx-auto px-4 py-20 text-center">
           <p className="text-muted-foreground mb-4">Product not found</p>
           <Button onClick={() => navigate("/")}>
@@ -127,25 +99,18 @@ const ProductDetails = () => {
     );
   }
 
-  const isOutOfStock = product.stock === 0;
-  const isLowStock = product.stock > 0 && product.stock <= 5;
-
   return (
     <div className="min-h-screen bg-background">
-      <Header cartItems={[]} />
+      <Header />
 
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Button
-          variant="ghost"
-          onClick={() => navigate(buildRoute("/"))}
-          className="mb-6"
-        >
+        <Button variant="ghost" onClick={() => navigate("/")} className="mb-6">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Shop
         </Button>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Product Images with Zoom */}
+          {/* Product Images */}
           <div className="space-y-4">
             <ProductImageCarousel
               images={product.images && product.images.length > 0 ? product.images : [product.imageUrl]}
@@ -175,17 +140,36 @@ const ProductDetails = () => {
             </h1>
 
             <div className="flex items-center gap-4 mb-6">
-              <div className="flex items-center gap-1">
-                <AnimatedRating rating={product.rating} />
-                <span className="text-sm text-muted-foreground ml-1">
-                  ({product.rating} rating)
-                </span>
-              </div>
-              <Separator orientation="vertical" className="h-5" />
-              <Button variant="link" className="p-0 h-auto text-primary">
-                Read Reviews
-              </Button>
+              <AnimatedRating rating={product.rating} />
+              <span className="text-sm text-muted-foreground">({product.rating} rating)</span>
             </div>
+
+            {/* Seller Info - Amazon Style */}
+            {product.seller && (
+              <div className="bg-muted/50 border rounded-lg p-4 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">Sold by:</span>
+                    <span className="font-semibold text-foreground">{product.seller.name}</span>
+                    {product.seller.verified && (
+                      <BadgeCheck className="h-4 w-4 text-blue-500" />
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-1">
+                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                    <span>{product.seller.rating} ({product.seller.totalRatings.toLocaleString()} ratings)</span>
+                  </div>
+                  {product.seller.location && (
+                    <div className="flex items-center gap-1">
+                      <MapPin className="h-4 w-4" />
+                      <span>{product.seller.location}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             <div className="space-y-4 mb-8">
               <div className="flex items-baseline gap-3">
@@ -214,7 +198,7 @@ const ProductDetails = () => {
                   <div>
                     <h4 className="font-semibold text-amber-900">Made just for you</h4>
                     <p className="text-sm text-amber-800">
-                      This item is handmade to order. Please allow approximately <span className="font-bold">{product.preparationTime} days</span> for preparation before shipping.
+                      Please allow approximately <span className="font-bold">{product.preparationTime} days</span> for preparation.
                     </p>
                   </div>
                 </div>
@@ -226,11 +210,7 @@ const ProductDetails = () => {
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <span className="font-medium text-foreground">Quantity</span>
-                <QuantitySelector
-                  value={quantity}
-                  max={product.stock}
-                  onChange={setQuantity}
-                />
+                <QuantitySelector value={quantity} max={product.stock} onChange={setQuantity} />
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3">
@@ -241,74 +221,30 @@ const ProductDetails = () => {
                   disabled={product.stock === 0}
                 >
                   <ShoppingCart className="h-5 w-5" />
-                  {product.stock === 0
-                    ? "Out of Stock"
-                    : product.isMadeToOrder
-                      ? "Request Order"
-                      : "Add to Cart"}
+                  {product.stock === 0 ? "Out of Stock" : product.isMadeToOrder ? "Request Order" : "Add to Cart"}
                 </Button>
-                <WishlistButton
-                  productId={product.id}
-                  productName={product.name}
-                  size="lg"
-                  className="w-full sm:w-auto h-12 px-4"
-                  showLabel
-                />
-                <SocialShare
-                  title={product.name}
-                  description={product.description}
-                />
+                <WishlistButton productId={product.id} productName={product.name} size="lg" className="w-full sm:w-auto h-12 px-4" showLabel />
+                <SocialShare title={product.name} description={product.description} />
               </div>
-            </div>
-
-            <div className="bg-muted rounded-lg p-6 space-y-2">
-              <h3 className="font-display font-semibold text-foreground">
-                Product Details
-              </h3>
-              <ul className="space-y-1 text-sm text-muted-foreground">
-                <li>• Free shipping on orders over ₹999</li>
-                <li>• Easy returns within 30 days</li>
-                <li>• Handcrafted with care</li>
-                <li>• Sustainable materials</li>
-              </ul>
             </div>
           </div>
         </div>
 
         {/* Reviews Section */}
         <Separator className="my-12" />
-        <div className="max-w-4xl mx-auto">
-          <ProductReviews productId={product.id} productName={product.name} />
-        </div>
+        <ProductReviews productId={product.id} productName={product.name} />
 
-        {/* Recommendations Section */}
+        {/* Recommendations */}
         <Separator className="my-12" />
-        <ProductRecommendations
-          currentProduct={product}
-          allProducts={allProducts}
-          maxItems={4}
-          onAddToCart={handleAddToCart}
-          onQuickView={handleQuickView}
-        />
+        <ProductRecommendations currentProduct={product} allProducts={allProducts} maxItems={4} onAddToCart={handleAddToCart} onQuickView={handleQuickView} />
 
-        {/* Recently Viewed Section */}
+        {/* Recently Viewed */}
         <Separator className="my-12" />
-        <RecentlyViewed
-          currentProductId={product.id}
-          maxItems={4}
-          onAddToCart={handleAddToCart}
-          onQuickView={handleQuickView}
-        />
+        <RecentlyViewed currentProductId={product.id} maxItems={4} onAddToCart={handleAddToCart} onQuickView={handleQuickView} />
       </main>
 
-      {/* Quick View Modal */}
       {selectedProduct && (
-        <QuickViewModal
-          product={selectedProduct}
-          open={quickViewOpen}
-          onOpenChange={setQuickViewOpen}
-          onAddToCart={handleAddToCart}
-        />
+        <QuickViewModal product={selectedProduct} open={quickViewOpen} onOpenChange={setQuickViewOpen} onAddToCart={handleAddToCart} />
       )}
     </div>
   );

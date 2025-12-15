@@ -6,7 +6,6 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { AddressDto } from "@/types/dto";
 import { useToast } from "@/hooks/use-toast";
-import { useTenant } from "@/hooks/useTenant";
 import { addAddress, updateAddress } from "../services/profileService";
 
 interface AddressDialogProps {
@@ -31,7 +30,6 @@ export const AddressDialog = ({ open, address, onClose }: AddressDialogProps) =>
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const { toast } = useToast();
-  const { tenant } = useTenant();
 
   useEffect(() => {
     if (address) {
@@ -82,18 +80,18 @@ export const AddressDialog = ({ open, address, onClose }: AddressDialogProps) =>
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateForm() || !tenant) return;
+    if (!validateForm()) return;
 
     setIsLoading(true);
     try {
       if (address) {
-        await updateAddress(tenant.id, address.id, formData);
+        await updateAddress(address.id, formData);
         toast({
           title: "Address updated",
           description: "Your address has been updated successfully",
         });
       } else {
-        await addAddress(tenant.id, formData);
+        await addAddress(formData);
         toast({
           title: "Address added",
           description: "New address has been added successfully",

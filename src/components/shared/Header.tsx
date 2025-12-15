@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import { ShoppingCart, Package, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,24 +11,16 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MiniCart } from "@/features/cart/components/MiniCart";
 import { CartItemDto } from "@/types/dto";
-import { useTenant } from "@/hooks/useTenant";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useCart } from "@/hooks/useCart";
 import { useLocation } from "@/hooks/useLocation";
 import { MapPin, Loader2 } from "lucide-react";
 import { CategoryNav } from "@/components/shared/CategoryNav";
 
-interface HeaderProps {
-  cartItems?: CartItemDto[];
-  onRemoveCartItem?: (itemId: number) => void;
-  onUpdateCartQuantity?: (itemId: number, quantity: number) => void;
-}
-
-export const Header = ({ cartItems = [], onRemoveCartItem, onUpdateCartQuantity }: HeaderProps) => {
-  const { tenant, buildRoute } = useTenant();
+export const Header = () => {
   const { user, logout } = useAuth();
+  const { cartItems, removeItem, updateQuantity } = useCart();
   const { city, pincode, loading, error, detectLocation } = useLocation();
-
-  if (!tenant) return null;
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white shadow-sm">
@@ -38,18 +29,8 @@ export const Header = ({ cartItems = [], onRemoveCartItem, onUpdateCartQuantity 
         <div className="container mx-auto px-4">
           <div className="flex h-14 items-center justify-between gap-4">
             {/* Logo */}
-            <Link to={buildRoute("/")} className="flex items-center flex-shrink-0">
-              {tenant.theme.logoUrl ? (
-                <img
-                  src={tenant.theme.logoUrl}
-                  alt={tenant.name}
-                  className="h-8 w-auto brightness-0 invert"
-                />
-              ) : (
-                <h1 className="text-xl font-bold">
-                  {tenant.name}
-                </h1>
-              )}
+            <Link to="/" className="flex items-center flex-shrink-0">
+              <h1 className="text-xl font-bold">Homebase</h1>
             </Link>
 
             {/* Location Detection */}
@@ -93,8 +74,8 @@ export const Header = ({ cartItems = [], onRemoveCartItem, onUpdateCartQuantity 
               {/* Cart */}
               <MiniCart
                 items={cartItems}
-                onRemoveItem={onRemoveCartItem || (() => { })}
-                onUpdateQuantity={onUpdateCartQuantity || (() => { })}
+                onRemoveItem={removeItem}
+                onUpdateQuantity={updateQuantity}
               />
 
               {/* Login/User */}
@@ -115,13 +96,13 @@ export const Header = ({ cartItems = [], onRemoveCartItem, onUpdateCartQuantity 
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild className="cursor-pointer">
-                      <Link to={buildRoute("/profile")} className="flex items-center">
+                      <Link to="/profile" className="flex items-center">
                         <User className="mr-2 h-4 w-4" />
                         <span>Profile</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild className="cursor-pointer">
-                      <Link to={buildRoute("/orders")} className="flex items-center">
+                      <Link to="/orders" className="flex items-center">
                         <Package className="mr-2 h-4 w-4" />
                         <span>Orders</span>
                       </Link>
@@ -135,9 +116,7 @@ export const Header = ({ cartItems = [], onRemoveCartItem, onUpdateCartQuantity 
                 </DropdownMenu>
               ) : (
                 <Button asChild variant="ghost" size="sm" className="text-white hover:bg-primary-foreground/10">
-                  <Link to={buildRoute("/login")}>
-                    Login
-                  </Link>
+                  <Link to="/login">Login</Link>
                 </Button>
               )}
             </div>

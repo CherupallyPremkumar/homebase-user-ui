@@ -1,31 +1,21 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { ProductDto, CartItemDto } from "@/types/dto";
+import { ProductDto } from "@/types/dto";
 import { productService } from "@/features/products/services/productService";
-import { cartService } from "@/features/cart/services/cartService";
 import { ProductCard } from "@/features/products/components/ProductCard";
 import { Header } from "@/components/shared/Header";
+import { useCart } from "@/hooks/useCart";
 import { toast } from "@/hooks/use-toast";
-import { useTenant } from "@/hooks/useTenant";
 import { Loader2, ChevronLeft, ChevronRight, ChevronRight as ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import CategoryPage from "@/features/products/pages/CategoryPage";
+
 
 const Home = () => {
-  const { tenant, buildRoute } = useTenant();
-  const [searchParams] = useSearchParams();
   const [products, setProducts] = useState<ProductDto[]>([]);
   const [loading, setLoading] = useState(true);
-  const [cartItems, setCartItems] = useState<CartItemDto[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
-
-  const category = searchParams.get("category");
-
-  // If category is selected, show category page instead
-  if (category) {
-    return <CategoryPage />;
-  }
+  const { addToCart } = useCart();
 
   const heroSlides = [
     {
@@ -46,11 +36,8 @@ const Home = () => {
   ];
 
   useEffect(() => {
-    if (tenant) {
-      loadProducts();
-      loadCartCount();
-    }
-  }, [tenant]);
+    loadProducts();
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -61,7 +48,7 @@ const Home = () => {
 
   const loadProducts = async () => {
     try {
-      const data = await productService.getAllProducts(tenant?.id);
+      const data = await productService.getAllProducts();
       setProducts(data);
     } catch (error) {
       toast({
@@ -74,63 +61,8 @@ const Home = () => {
     }
   };
 
-  const loadCartCount = async () => {
-    try {
-      const cart = await cartService.getCart(tenant?.id);
-      setCartItems(cart);
-    } catch (error) {
-      console.error("Failed to load cart", error);
-    }
-  };
-
   const handleAddToCart = async (productId: number) => {
-    try {
-      await cartService.addToCart(productId, 1, tenant?.id);
-      const updatedCart = await cartService.getCart(tenant?.id);
-      setCartItems(updatedCart);
-      toast({
-        title: "Added to cart",
-        description: "Product has been added to your cart",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to add product to cart",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleRemoveCartItem = async (itemId: number) => {
-    try {
-      await cartService.removeFromCart(itemId, tenant?.id);
-      const updatedCart = await cartService.getCart(tenant?.id);
-      setCartItems(updatedCart);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to remove item from cart",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleUpdateCartQuantity = async (itemId: number, quantity: number) => {
-    try {
-      if (quantity < 1) {
-        await handleRemoveCartItem(itemId);
-        return;
-      }
-      await cartService.updateCartItem(itemId, quantity, tenant?.id);
-      const updatedCart = await cartService.getCart(tenant?.id);
-      setCartItems(updatedCart);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update cart",
-        variant: "destructive",
-      });
-    }
+    await addToCart(productId, 1);
   };
 
   const nextSlide = () => {
@@ -162,11 +94,7 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header
-        cartItems={cartItems}
-        onRemoveCartItem={handleRemoveCartItem}
-        onUpdateCartQuantity={handleUpdateCartQuantity}
-      />
+      <Header />
 
       {/* Hero Carousel */}
       <div className="relative bg-gradient-to-b from-gray-100 to-gray-50">
@@ -226,7 +154,7 @@ const Home = () => {
               {categories.map((category) => (
                 <Link
                   key={category.name}
-                  to={buildRoute(`/?category=${category.name.toLowerCase()}`)}
+                  to={`/?category=${category.name.toLowerCase()}`}
                   className="flex flex-col items-center gap-2 hover:scale-105 transition-transform"
                 >
                   <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${category.color} flex items-center justify-center text-3xl`}>
@@ -244,7 +172,7 @@ const Home = () => {
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-2xl font-bold">Best Value Deals on Fashion</h2>
                 <Button variant="ghost" className="text-primary gap-1" asChild>
-                  <Link to={buildRoute("/?sale=true")}>
+                  <Link to="/?sale=true">
                     <ArrowRight className="h-5 w-5" />
                   </Link>
                 </Button>
@@ -268,7 +196,7 @@ const Home = () => {
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-2xl font-bold">Handmade & Made to Order</h2>
                 <Button variant="ghost" className="text-primary gap-1" asChild>
-                  <Link to={buildRoute("/?madetoorder=true")}>
+                  <Link to="/?madetoorder=true">
                     <ArrowRight className="h-5 w-5" />
                   </Link>
                 </Button>
@@ -292,7 +220,7 @@ const Home = () => {
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-2xl font-bold">{category}</h2>
                 <Button variant="ghost" className="text-primary gap-1" asChild>
-                  <Link to={buildRoute(`/?category=${category.toLowerCase()}`)}>
+                  <Link to={`/?category=${category.toLowerCase()}`}>
                     <ArrowRight className="h-5 w-5" />
                   </Link>
                 </Button>

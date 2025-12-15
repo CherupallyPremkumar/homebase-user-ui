@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { useTenant } from "@/hooks/useTenant";
 import { updateProfile } from "../services/profileService";
 import { UpdateProfileDto } from "@/types/dto";
 
@@ -26,7 +25,6 @@ export const ProfileEditForm = ({ initialData, onUpdate }: ProfileEditFormProps)
   const [errors, setErrors] = useState<{ name?: string; phone?: string }>({});
 
   const { toast } = useToast();
-  const { tenant } = useTenant();
 
   const validateForm = () => {
     const newErrors: { name?: string; phone?: string } = {};
@@ -44,7 +42,7 @@ export const ProfileEditForm = ({ initialData, onUpdate }: ProfileEditFormProps)
   };
 
   const handleSave = async () => {
-    if (!validateForm() || !tenant) return;
+    if (!validateForm()) return;
 
     setIsLoading(true);
     try {
@@ -53,7 +51,7 @@ export const ProfileEditForm = ({ initialData, onUpdate }: ProfileEditFormProps)
         phone: phone || undefined,
       };
 
-      await updateProfile(tenant.id, updateData);
+      await updateProfile(updateData);
 
       toast({
         title: "Profile updated",

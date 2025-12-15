@@ -4,23 +4,19 @@ import { orderService } from "../services/orderService";
 import { Header } from "@/components/shared/Header";
 import { OrderCard } from "./OrderCard";
 import { toast } from "@/hooks/use-toast";
-import { useTenant } from "@/hooks/useTenant";
 import { Loader2, Package } from "lucide-react";
 
 const MyOrders = () => {
-  const { tenant } = useTenant();
   const [orders, setOrders] = useState<OrderDto[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (tenant) {
-      loadOrders();
-    }
-  }, [tenant]);
+    loadOrders();
+  }, []);
 
   const loadOrders = async () => {
     try {
-      const data = await orderService.getAllOrders(tenant?.id);
+      const data = await orderService.getAllOrders();
       setOrders(data);
     } catch (error) {
       toast({

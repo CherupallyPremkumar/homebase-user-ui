@@ -1,5 +1,7 @@
 // DTOs matching Spring Boot backend
 
+import { SellerDto } from './seller';
+
 export interface ProductDto {
   id: number;
   name: string;
@@ -16,6 +18,7 @@ export interface ProductDto {
   discount?: number; // Percentage discount
   onSale?: boolean; // Is on sale
   inStock?: boolean; // Stock availability filter
+  seller: SellerDto; // Seller info for marketplace
 }
 
 export interface CartItemDto {
@@ -26,7 +29,10 @@ export interface CartItemDto {
   price: number;
   quantity: number;
   subtotal: number;
+  sellerId: string; // For grouping items by seller
+  sellerName: string;
 }
+
 
 export interface CreatePaymentRequestDto {
   amount: number;
@@ -114,7 +120,6 @@ export interface CustomerProfileDto {
   phone?: string;
   addresses: AddressDto[];
   notificationSettings: NotificationSettingsDto;
-  tenantId: string;
 }
 
 export interface NotificationSettingsDto {

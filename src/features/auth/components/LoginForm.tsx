@@ -7,7 +7,6 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "../hooks/useAuth";
-import { useTenant } from "@/hooks/useTenant";
 import { useToast } from "@/hooks/use-toast";
 
 const Login = () => {
@@ -19,7 +18,6 @@ const Login = () => {
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
   const { login } = useAuth();
-  const { tenant, buildRoute } = useTenant();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -60,8 +58,7 @@ const Login = () => {
         description: `Welcome back, ${email.split("@")[0]}!`,
       });
 
-      // Redirect to home
-      navigate(buildRoute("/"));
+      navigate("/");
     } catch (error) {
       toast({
         title: "Login failed",
@@ -73,14 +70,12 @@ const Login = () => {
     }
   };
 
-  if (!tenant) return null;
-
   return (
     <div className="min-h-screen flex items-center justify-center gradient-warm px-4 py-8">
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader className="space-y-2">
           <CardTitle className="text-2xl sm:text-3xl font-display text-center text-gradient">
-            {tenant.name}
+            Homebase Marketplace
           </CardTitle>
           <CardDescription className="text-center text-base">
             Sign in to your account
@@ -89,9 +84,7 @@ const Login = () => {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-semibold">
-                Email
-              </Label>
+              <Label htmlFor="email" className="text-sm font-semibold">Email</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
@@ -104,17 +97,11 @@ const Login = () => {
                   disabled={isLoading}
                 />
               </div>
-              {errors.email && (
-                <p className="text-sm text-destructive animate-fade-in">
-                  {errors.email}
-                </p>
-              )}
+              {errors.email && <p className="text-sm text-destructive animate-fade-in">{errors.email}</p>}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-semibold">
-                Password
-              </Label>
+              <Label htmlFor="password" className="text-sm font-semibold">Password</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
@@ -129,44 +116,21 @@ const Login = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-smooth"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                   disabled={isLoading}
                 >
-                  {showPassword ? (
-                    <EyeOff className="h-5 w-5" />
-                  ) : (
-                    <Eye className="h-5 w-5" />
-                  )}
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
-              {errors.password && (
-                <p className="text-sm text-destructive animate-fade-in">
-                  {errors.password}
-                </p>
-              )}
+              {errors.password && <p className="text-sm text-destructive animate-fade-in">{errors.password}</p>}
             </div>
 
             <div className="flex items-center space-x-2">
-              <Checkbox
-                id="remember"
-                checked={rememberMe}
-                onCheckedChange={(checked) => setRememberMe(checked === true)}
-                disabled={isLoading}
-              />
-              <label
-                htmlFor="remember"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-              >
-                Remember me
-              </label>
+              <Checkbox id="remember" checked={rememberMe} onCheckedChange={(checked) => setRememberMe(checked === true)} disabled={isLoading} />
+              <label htmlFor="remember" className="text-sm font-medium cursor-pointer">Remember me</label>
             </div>
 
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isLoading}
-              size="lg"
-            >
+            <Button type="submit" className="w-full" disabled={isLoading} size="lg">
               {isLoading ? "Signing in..." : "Sign in"}
             </Button>
           </form>

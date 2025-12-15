@@ -6,7 +6,6 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { NotificationSettingsDto } from "@/types/dto";
 import { useToast } from "@/hooks/use-toast";
-import { useTenant } from "@/hooks/useTenant";
 import { updateNotificationSettings } from "../services/profileService";
 
 interface NotificationSettingsProps {
@@ -20,7 +19,6 @@ export const NotificationSettings = ({ initialSettings, onUpdate }: Notification
   const [hasChanges, setHasChanges] = useState(false);
 
   const { toast } = useToast();
-  const { tenant } = useTenant();
 
   const handleToggle = (key: keyof NotificationSettingsDto) => {
     setSettings((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -28,11 +26,9 @@ export const NotificationSettings = ({ initialSettings, onUpdate }: Notification
   };
 
   const handleSave = async () => {
-    if (!tenant) return;
-
     setIsLoading(true);
     try {
-      await updateNotificationSettings(tenant.id, settings);
+      await updateNotificationSettings(settings);
       toast({
         title: "Settings updated",
         description: "Your notification preferences have been saved",

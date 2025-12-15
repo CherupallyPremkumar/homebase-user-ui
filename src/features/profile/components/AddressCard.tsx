@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { AddressDto } from "@/types/dto";
 import { AddressDialog } from "./AddressDialog";
 import { useToast } from "@/hooks/use-toast";
-import { useTenant } from "@/hooks/useTenant";
 import { updateAddress, deleteAddress } from "../services/profileService";
 
 interface AddressCardProps {
@@ -19,7 +18,6 @@ export const AddressCard = ({ addresses, onUpdate }: AddressCardProps) => {
   const [editingAddress, setEditingAddress] = useState<AddressDto | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const { toast } = useToast();
-  const { tenant } = useTenant();
 
   const handleEdit = (address: AddressDto) => {
     setEditingAddress(address);
@@ -32,11 +30,9 @@ export const AddressCard = ({ addresses, onUpdate }: AddressCardProps) => {
   };
 
   const handleDelete = async (addressId: string) => {
-    if (!tenant) return;
-
     setDeletingId(addressId);
     try {
-      await deleteAddress(tenant.id, addressId);
+      await deleteAddress(addressId);
       toast({
         title: "Address deleted",
         description: "Address has been removed successfully",

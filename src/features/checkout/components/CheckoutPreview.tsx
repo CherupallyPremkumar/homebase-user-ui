@@ -13,7 +13,6 @@ import { Separator } from "@/components/ui/separator";
 import { ProductDto } from "@/types/dto";
 import { PaymentMethodBadges } from "./PaymentMethodSelector";
 import { ShippingBadge } from "./ShippingCalculator";
-import { useTenant } from "@/hooks/useTenant";
 import { useNavigate } from "react-router-dom";
 
 interface CheckoutPreviewProps {
@@ -23,7 +22,6 @@ interface CheckoutPreviewProps {
 }
 
 export const CheckoutPreview = ({ product, quantity, trigger }: CheckoutPreviewProps) => {
-  const { buildRoute } = useTenant();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
@@ -34,7 +32,7 @@ export const CheckoutPreview = ({ product, quantity, trigger }: CheckoutPreviewP
 
   const handleCheckout = () => {
     // In a real app, this would add to cart and navigate to checkout
-    navigate(buildRoute("/checkout"));
+    navigate("/checkout");
     setOpen(false);
   };
 

@@ -4,7 +4,6 @@ import { Badge } from "@/components/ui/badge";
 import { OrderCard } from "@/features/orders/components/OrderCard";
 import { Button } from "@/components/ui/button";
 import { OrderDto, OrderStatus } from "@/types/dto";
-import { useTenant } from "@/hooks/useTenant";
 import { orderService } from "@/features/orders/services/orderService";
 import { useNavigate } from "react-router-dom";
 
@@ -29,7 +28,6 @@ const getStatusColor = (status: OrderStatus) => {
 };
 
 export const OrderSummaryCard = ({ orders }: OrderSummaryCardProps) => {
-  const { buildRoute } = useTenant();
   const navigate = useNavigate();
 
   const recentOrders = orders.slice(0, 3);
@@ -48,7 +46,7 @@ export const OrderSummaryCard = ({ orders }: OrderSummaryCardProps) => {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate(buildRoute("/orders"))}
+            onClick={() => navigate("/orders")}
           >
             View All
           </Button>
@@ -62,7 +60,7 @@ export const OrderSummaryCard = ({ orders }: OrderSummaryCardProps) => {
             <Button
               variant="link"
               className="mt-2"
-              onClick={() => navigate(buildRoute("/"))}
+              onClick={() => navigate("/")}
             >
               Start Shopping
             </Button>
@@ -73,7 +71,7 @@ export const OrderSummaryCard = ({ orders }: OrderSummaryCardProps) => {
               <div
                 key={order.id}
                 className="flex items-center justify-between p-4 rounded-lg border border-border/50 hover:border-primary/50 transition-smooth cursor-pointer hover:shadow-md"
-                onClick={() => navigate(buildRoute(`/order/${order.id}`))}
+                onClick={() => navigate(`/order/${order.id}`)}
               >
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">

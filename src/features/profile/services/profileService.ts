@@ -1,17 +1,17 @@
-import { CustomerProfileDto, AddressDto, NotificationSettingsDto, UpdateProfileDto } from "@/types/dto";
+import {
+  CustomerProfileDto,
+  AddressDto,
+  NotificationSettingsDto,
+  UpdateProfileDto,
+} from "@/types/dto";
+import { API_BASE_URL } from "@/lib/config";
 
-/**
- * Profile Service - Mock implementation
- * Replace with actual API endpoints
- */
-
-// Mock profile data
+// Mock profile data for development
 const mockProfile: CustomerProfileDto = {
   id: "customer_123",
   name: "John Doe",
   email: "john@example.com",
   phone: "+91-9876543210",
-  tenantId: "havenhome",
   addresses: [
     {
       id: "addr_1",
@@ -25,17 +25,6 @@ const mockProfile: CustomerProfileDto = {
       pincode: "400001",
       isDefault: true,
     },
-    {
-      id: "addr_2",
-      label: "Office",
-      fullName: "John Doe",
-      phone: "+91-9876543210",
-      addressLine1: "456 Business Park",
-      city: "Mumbai",
-      state: "Maharashtra",
-      pincode: "400002",
-      isDefault: false,
-    },
   ],
   notificationSettings: {
     orderUpdates: true,
@@ -47,115 +36,79 @@ const mockProfile: CustomerProfileDto = {
 /**
  * Get customer profile
  */
-export const getProfile = async (tenantId: string): Promise<CustomerProfileDto> => {
-  // TODO: Replace with actual API call
-  // const response = await fetch(`/api/customer/profile?tenantId=${tenantId}`);
-  // return await response.json();
-
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  return { ...mockProfile, tenantId };
+export const getProfile = async (): Promise<CustomerProfileDto> => {
+  const response = await fetch(`${API_BASE_URL}/customer/profile`);
+  if (!response.ok) throw new Error("Failed to fetch profile");
+  return response.json();
 };
 
 /**
  * Update customer profile
  */
 export const updateProfile = async (
-  tenantId: string,
   data: UpdateProfileDto
 ): Promise<CustomerProfileDto> => {
-  // TODO: Replace with actual API call
-  // const response = await fetch(`/api/customer/profile?tenantId=${tenantId}`, {
-  //   method: 'PUT',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify(data),
-  // });
-  // return await response.json();
-
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  return {
-    ...mockProfile,
-    name: data.name,
-    phone: data.phone,
-    tenantId,
-  };
+  const response = await fetch(`${API_BASE_URL}/customer/profile`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) throw new Error("Failed to update profile");
+  return response.json();
 };
 
 /**
  * Add new address
  */
 export const addAddress = async (
-  tenantId: string,
   address: Omit<AddressDto, "id">
 ): Promise<AddressDto> => {
-  // TODO: Replace with actual API call
-  // const response = await fetch(`/api/customer/address?tenantId=${tenantId}`, {
-  //   method: 'POST',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify(address),
-  // });
-  // return await response.json();
-
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  return {
-    ...address,
-    id: `addr_${Date.now()}`,
-  };
+  const response = await fetch(`${API_BASE_URL}/customer/address`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(address),
+  });
+  if (!response.ok) throw new Error("Failed to add address");
+  return response.json();
 };
 
 /**
  * Update address
  */
 export const updateAddress = async (
-  tenantId: string,
   addressId: string,
   address: Partial<AddressDto>
 ): Promise<AddressDto> => {
-  // TODO: Replace with actual API call
-  // const response = await fetch(`/api/customer/address/${addressId}?tenantId=${tenantId}`, {
-  //   method: 'PUT',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify(address),
-  // });
-  // return await response.json();
-
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  const existingAddress = mockProfile.addresses.find((a) => a.id === addressId);
-  return {
-    ...existingAddress!,
-    ...address,
-  };
+  const response = await fetch(`${API_BASE_URL}/customer/address/${addressId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(address),
+  });
+  if (!response.ok) throw new Error("Failed to update address");
+  return response.json();
 };
 
 /**
  * Delete address
  */
-export const deleteAddress = async (
-  tenantId: string,
-  addressId: string
-): Promise<void> => {
-  // TODO: Replace with actual API call
-  // await fetch(`/api/customer/address/${addressId}?tenantId=${tenantId}`, {
-  //   method: 'DELETE',
-  // });
-
-  await new Promise((resolve) => setTimeout(resolve, 500));
+export const deleteAddress = async (addressId: string): Promise<void> => {
+  const response = await fetch(`${API_BASE_URL}/customer/address/${addressId}`, {
+    method: "DELETE",
+  });
+  if (!response.ok) throw new Error("Failed to delete address");
 };
 
 /**
  * Update notification settings
  */
 export const updateNotificationSettings = async (
-  tenantId: string,
   settings: NotificationSettingsDto
 ): Promise<NotificationSettingsDto> => {
-  // TODO: Replace with actual API call
-  // const response = await fetch(`/api/customer/notifications?tenantId=${tenantId}`, {
-  //   method: 'PUT',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify(settings),
-  // });
-  // return await response.json();
-
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  return settings;
+  const response = await fetch(`${API_BASE_URL}/customer/notifications`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(settings),
+  });
+  if (!response.ok) throw new Error("Failed to update notifications");
+  return response.json();
 };

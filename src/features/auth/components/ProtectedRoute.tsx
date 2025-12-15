@@ -2,7 +2,6 @@ import { ReactNode, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
-import { useTenant } from "@/hooks/useTenant";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -13,12 +12,11 @@ interface ProtectedRouteProps {
  */
 export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { isAuthenticated, isLoading } = useAuth();
-  const { tenant, buildRoute } = useTenant();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      navigate(buildRoute("/login"), { replace: true });
+      navigate("/login"), { replace: true };
     }
   }, [isAuthenticated, isLoading, navigate, buildRoute]);
 

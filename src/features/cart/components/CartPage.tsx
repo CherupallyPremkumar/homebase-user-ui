@@ -1,77 +1,24 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { CartItemDto } from "@/types/dto";
-import { cartService } from "../services/cartService";
 import { Header } from "@/components/shared/Header";
+import { useCart } from "@/hooks/useCart";
 import { CartItemCard } from "./CartItemCard";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/hooks/use-toast";
-import { useTenant } from "@/hooks/useTenant";
 import { Loader2, ShoppingBag, ArrowRight } from "lucide-react";
 
 const Cart = () => {
   const navigate = useNavigate();
-  const { tenant, buildRoute } = useTenant();
-  const [cartItems, setCartItems] = useState<CartItemDto[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (tenant) {
-      loadCart();
-    }
-  }, [tenant]);
-
-  const loadCart = async () => {
-    try {
-      const data = await cartService.getCart(tenant?.id);
-      setCartItems(data);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to load cart",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { cartItems, loading, updateQuantity, removeItem } = useCart();
 
   const handleUpdateQuantity = async (itemId: number, quantity: number) => {
-    try {
-      await cartService.updateCartItem(itemId, quantity, tenant?.id);
-      setCartItems((items) =>
-        items.map((item) =>
-          item.id === itemId
-            ? { ...item, quantity, subtotal: item.price * quantity }
-            : item
-        )
-      );
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update quantity",
-        variant: "destructive",
-      });
-    }
+    await updateQuantity(itemId, quantity);
   };
 
   const handleRemoveItem = async (itemId: number) => {
-    try {
-      await cartService.removeFromCart(itemId, tenant?.id);
-      setCartItems((items) => items.filter((item) => item.id !== itemId));
-      toast({
-        title: "Removed",
-        description: "Item removed from cart",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to remove item",
-        variant: "destructive",
-      });
-    }
+    await removeItem(itemId);
   };
 
   const subtotal = cartItems.reduce((sum, item) => sum + item.subtotal, 0);
@@ -82,7 +29,7 @@ const Cart = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <Header cartItems={[]} />
+        <Header />
         <div className="flex justify-center items-center py-20">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
@@ -93,7 +40,7 @@ const Cart = () => {
   if (cartItems.length === 0) {
     return (
       <div className="min-h-screen bg-background">
-        <Header cartItems={[]} />
+        <Header />
         <div className="container mx-auto px-4 py-20 text-center">
           <ShoppingBag className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
           <h2 className="text-2xl font-display font-bold text-foreground mb-2">
@@ -102,9 +49,7 @@ const Cart = () => {
           <p className="text-muted-foreground mb-6">
             Start adding some beautiful items to your cart
           </p>
-          <Button onClick={() => navigate(buildRoute("/"))}>
-            Continue Shopping
-          </Button>
+          <Button onClick={() => navigate("/")}>Continue Shopping</Button>
         </div>
       </div>
     );
@@ -112,7 +57,7 @@ const Cart = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header cartItems={cartItems} />
+      <Header />
 
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="text-3xl sm:text-4xl font-display font-bold text-foreground mb-8">
@@ -174,7 +119,7 @@ const Cart = () => {
               <Button
                 size="lg"
                 className="w-full gap-2"
-                onClick={() => navigate(buildRoute("/checkout"))}
+                onClick={() => navigate("/checkout")}
               >
                 Proceed to Checkout
                 <ArrowRight className="h-4 w-4" />
