@@ -12,6 +12,7 @@ export interface LocationState {
 
 export interface LocationContextType extends LocationState {
     detectLocation: () => Promise<void>;
+    updateLocation: (city: string) => void;
 }
 
 export const LocationContext = createContext<LocationContextType>({
@@ -23,6 +24,7 @@ export const LocationContext = createContext<LocationContextType>({
     error: null,
     loading: false,
     detectLocation: async () => { },
+    updateLocation: () => { },
 });
 
 interface LocationProviderProps {
@@ -119,6 +121,20 @@ export const LocationProvider = ({ children }: LocationProviderProps) => {
         );
     };
 
+    const updateLocation = (city: string) => {
+        const newLocation = {
+            ...location,
+            city,
+            // Reset other granular fields since we only know city
+            latitude: null,
+            longitude: null,
+            state: null,
+            pincode: null,
+        };
+        setLocation(newLocation);
+        localStorage.setItem("user_location", JSON.stringify(newLocation));
+    };
+
     return (
         <LocationContext.Provider
             value={{
@@ -126,6 +142,7 @@ export const LocationProvider = ({ children }: LocationProviderProps) => {
                 loading,
                 error,
                 detectLocation,
+                updateLocation,
             }}
         >
             {children}

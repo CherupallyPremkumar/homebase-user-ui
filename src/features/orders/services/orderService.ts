@@ -4,7 +4,7 @@ import { API_BASE_URL } from "@/lib/config";
 export const orderService = {
   // GET /api/orders
   getAllOrders: async (): Promise<OrderDto[]> => {
-    const response = await fetch(`${API_BASE_URL}/orders`);
+    const response = await fetch(`${API_BASE_URL}/order`);
     if (!response.ok) throw new Error("Failed to fetch orders");
     return response.json();
   },

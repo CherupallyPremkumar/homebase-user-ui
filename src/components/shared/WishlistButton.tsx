@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import { toggleWishlist as toggleWishlistApi, getWishlist as getWishlistApi } from "@/features/profile/services/wishlistService";
+import { useWishlistQuery, useWishlistToggleMutation } from "@/features/profile/services/wishlistService";
 
 interface WishlistButtonProps {
   productId: number;
@@ -24,49 +24,45 @@ export const WishlistButton = ({
   className,
 }: WishlistButtonProps) => {
   const { user } = useAuth();
-  const [isInWishlist, setIsInWishlist] = useState(false);
+  const [localIsInWishlist, setLocalIsInWishlist] = useState(false);
+
+  // Use React Query for data
+  const { data: wishlistItems } = useWishlistQuery(user?.email);
+  const toggleMutation = useWishlistToggleMutation();
+
+  const isApiConnected = !!user;
+  const isInWishlist = isApiConnected
+    ? wishlistItems?.some(p => p.id === productId) ?? false
+    : localIsInWishlist;
+
   const [isAnimating, setIsAnimating] = useState(false);
 
+  // Sync local storage for non-guest fallback
   useEffect(() => {
-    const checkStatus = async () => {
-      if (user) {
-        // API Check
-        try {
-          const items = await getWishlistApi(user.email);
-          const exists = items.some(p => p.id === productId);
-          setIsInWishlist(exists);
-        } catch (e) { console.error(e); }
-      } else {
-        // LocalStorage Check
-        const wishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
-        setIsInWishlist(wishlist.includes(productId));
-      }
-    };
-    checkStatus();
-  }, [productId, user]);
+    if (!isApiConnected) {
+      const wishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
+      setLocalIsInWishlist(wishlist.includes(productId));
+    }
+  }, [productId, isApiConnected]);
 
   const toggleWishlist = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
-    if (user) {
-      // API Toggle
+    if (isApiConnected) {
+      // API Toggle using Mutation
       try {
-        const response = await toggleWishlistApi(user.email, productId);
-        setIsInWishlist(response.added);
-        if (response.added) {
+        const result = await toggleMutation.mutateAsync({ email: user.email, productId });
+
+        if (result.added) {
           setIsAnimating(true);
           setTimeout(() => setIsAnimating(false), 600);
         }
-        toast({
-          title: response.added ? "Added to wishlist" : "Removed from wishlist",
-          description: response.message,
-        });
 
-        // Dispatch storage event to update other components? 
-        // Or we need a context. For now, we rely on page refresh for others or local state here.
-        // Actually, trigger a custom event for the hook to pick up?
-        window.dispatchEvent(new Event("wishlist-updated"));
+        toast({
+          title: result.added ? "Added to wishlist" : "Removed from wishlist",
+          description: result.message,
+        });
       } catch (err) {
         toast({ title: "Error", description: "Failed to update wishlist", variant: "destructive" });
       }
@@ -74,10 +70,10 @@ export const WishlistButton = ({
       // LocalStorage Toggle
       const wishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
 
-      if (isInWishlist) {
+      if (localIsInWishlist) {
         const updated = wishlist.filter((id: number) => id !== productId);
         localStorage.setItem("wishlist", JSON.stringify(updated));
-        setIsInWishlist(false);
+        setLocalIsInWishlist(false);
         toast({
           title: "Removed from wishlist",
           description: `${productName} has been removed from your wishlist`,
@@ -85,7 +81,7 @@ export const WishlistButton = ({
       } else {
         const updated = [...wishlist, productId];
         localStorage.setItem("wishlist", JSON.stringify(updated));
-        setIsInWishlist(true);
+        setLocalIsInWishlist(true);
         setIsAnimating(true);
         setTimeout(() => setIsAnimating(false), 600);
         toast({
@@ -137,36 +133,26 @@ export const WishlistButton = ({
   );
 };
 
-// Hook to get wishlist items
+// Hook to get wishlist items (Legacy wrapper for backward compat if needed, or update consumers)
 export const useWishlist = () => {
+  // This hook was previously listening to storage events. 
+  // We can leave it for now or update it to use React Query if consumed elsewhere.
+  // For now, simple implementation for non-button consumers:
   const { user } = useAuth();
-  const [wishlistIds, setWishlistIds] = useState<number[]>([]);
+  const { data } = useWishlistQuery(user?.email);
+  const [localIds, setLocalIds] = useState<number[]>([]);
 
   useEffect(() => {
-    const loadWishlist = async () => {
-      if (user) {
-        try {
-          const items = await getWishlistApi(user.email);
-          setWishlistIds(items.map(p => p.id));
-        } catch (e) {
-          console.error("Failed to load wishlist", e);
-        }
-      } else {
-        const wishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
-        setWishlistIds(wishlist);
-      }
-    };
-
-    loadWishlist();
-
-    // Listen for storage changes & custom event
-    window.addEventListener("storage", loadWishlist);
-    window.addEventListener("wishlist-updated", loadWishlist);
-    return () => {
-      window.removeEventListener("storage", loadWishlist);
-      window.removeEventListener("wishlist-updated", loadWishlist);
-    };
+    if (!user) {
+      const load = () => {
+        setLocalIds(JSON.parse(localStorage.getItem("wishlist") || "[]"));
+      };
+      load();
+      window.addEventListener("storage", load);
+      return () => window.removeEventListener("storage", load);
+    }
   }, [user]);
 
-  return wishlistIds;
+  if (user) return data?.map(d => d.id) || [];
+  return localIds;
 };

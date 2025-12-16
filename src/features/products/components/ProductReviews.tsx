@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Star, ThumbsUp, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -7,59 +7,29 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "@/hooks/use-toast";
-
-interface Review {
-  id: string;
-  author: string;
-  rating: number;
-  comment: string;
-  date: string;
-  helpful: number;
-  avatar?: string;
-}
+import { ReviewDto } from "@/types/dto";
 
 interface ProductReviewsProps {
   productId: number;
   productName: string;
+  reviews?: ReviewDto[];
 }
 
-// Mock reviews data
-const mockReviews: Review[] = [
-  {
-    id: "1",
-    author: "Sarah Johnson",
-    rating: 5,
-    comment: "Absolutely love this product! The quality is exceptional and it looks even better in person. Highly recommend!",
-    date: "2024-01-15",
-    helpful: 12,
-    avatar: undefined,
-  },
-  {
-    id: "2",
-    author: "Michael Chen",
-    rating: 4,
-    comment: "Great product overall. Shipping was fast and the packaging was excellent. Minor issue with color being slightly different from photos.",
-    date: "2024-01-10",
-    helpful: 8,
-  },
-  {
-    id: "3",
-    author: "Emma Wilson",
-    rating: 5,
-    comment: "This is my third purchase from this collection. Consistently high quality and beautiful design!",
-    date: "2024-01-05",
-    helpful: 15,
-  },
-];
-
-export const ProductReviews = ({ productId, productName }: ProductReviewsProps) => {
-  const [reviews, setReviews] = useState<Review[]>(mockReviews);
+export const ProductReviews = ({ productId, productName, reviews: initialReviews = [] }: ProductReviewsProps) => {
+  const [reviews, setReviews] = useState<ReviewDto[]>(initialReviews);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [newReview, setNewReview] = useState({
     rating: 5,
     author: "",
     comment: "",
   });
+
+  // Update reviews when prop changes
+  useEffect(() => {
+    if (initialReviews.length > 0) {
+      setReviews(initialReviews);
+    }
+  }, [initialReviews]);
 
   const handleSubmitReview = (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,7 +43,7 @@ export const ProductReviews = ({ productId, productName }: ProductReviewsProps) 
       return;
     }
 
-    const review: Review = {
+    const review: ReviewDto = {
       id: Date.now().toString(),
       author: newReview.author,
       rating: newReview.rating,
@@ -125,11 +95,10 @@ export const ProductReviews = ({ productId, productName }: ProductReviewsProps) 
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
-                    className={`h-5 w-5 ${
-                      i < Math.round(averageRating)
-                        ? "fill-primary text-primary"
-                        : "text-border"
-                    }`}
+                    className={`h-5 w-5 ${i < Math.round(averageRating)
+                      ? "fill-primary text-primary"
+                      : "text-border"
+                      }`}
                   />
                 ))}
               </div>
@@ -188,11 +157,10 @@ export const ProductReviews = ({ productId, productName }: ProductReviewsProps) 
                     className="transition-transform hover:scale-110"
                   >
                     <Star
-                      className={`h-8 w-8 ${
-                        rating <= newReview.rating
-                          ? "fill-primary text-primary"
-                          : "text-border"
-                      }`}
+                      className={`h-8 w-8 ${rating <= newReview.rating
+                        ? "fill-primary text-primary"
+                        : "text-border"
+                        }`}
                     />
                   </button>
                 ))}
@@ -268,11 +236,10 @@ export const ProductReviews = ({ productId, productName }: ProductReviewsProps) 
                     {[...Array(5)].map((_, i) => (
                       <Star
                         key={i}
-                        className={`h-4 w-4 ${
-                          i < review.rating
-                            ? "fill-primary text-primary"
-                            : "text-border"
-                        }`}
+                        className={`h-4 w-4 ${i < review.rating
+                          ? "fill-primary text-primary"
+                          : "text-border"
+                          }`}
                       />
                     ))}
                   </div>

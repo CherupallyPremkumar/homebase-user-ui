@@ -1,4 +1,4 @@
-import { ProductDto } from "@/types/dto";
+import { ProductDto, ProductViewDto, ReviewDto } from "@/types/dto";
 import { SellerDto } from "@/types/seller";
 import productVase from "@/assets/product-vase.jpg";
 import productWallHanging from "@/assets/product-wall-hanging.jpg";
@@ -248,14 +248,18 @@ const mockProducts: ProductDto[] = [
 
 export const productService = {
   // GET /api/products
-  getAllProducts: async (): Promise<ProductDto[]> => {
-    const response = await fetch(`${API_BASE_URL}/products`);
+  getAllProducts: async (city?: string | null): Promise<ProductDto[]> => {
+    let url = `${API_BASE_URL}/products`;
+    if (city) {
+      url += `?city=${encodeURIComponent(city)}`;
+    }
+    const response = await fetch(url);
     if (!response.ok) throw new Error("Failed to fetch products");
     return response.json();
   },
 
   // GET /api/products/{id}
-  getProductById: async (id: number): Promise<ProductDto | null> => {
+  getProductById: async (id: number): Promise<ProductViewDto | null> => {
     const response = await fetch(`${API_BASE_URL}/products/${id}`);
     if (!response.ok) throw new Error("Failed to fetch product");
     return response.json();

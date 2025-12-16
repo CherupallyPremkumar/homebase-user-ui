@@ -141,3 +141,18 @@ export interface CheckoutPreviewDto {
   total: number;
   currency: string;
 }
+
+export interface ReviewDto {
+  id: string;
+  author: string;
+  rating: number;
+  comment: string;
+  date: string;
+  helpful: number;
+  avatar?: string;
+}
+
+export interface ProductViewDto {
+  product: ProductDto;
+  reviews: ReviewDto[];
+}

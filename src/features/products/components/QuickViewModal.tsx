@@ -142,7 +142,7 @@ const QuickViewModal = ({
                 <ShoppingCart className="h-4 w-4" />
                 {isOutOfStock ? "Out of Stock" : `Add ${quantity} to Cart`}
               </Button>
-              <Link to={`/product/${product.id}`} className="flex-1">
+              <Link to={`/product?v=${product.id}`} className="flex-1">
                 <Button variant="outline" className="w-full gap-2">
                   <ExternalLink className="h-4 w-4" />
                   Full Details

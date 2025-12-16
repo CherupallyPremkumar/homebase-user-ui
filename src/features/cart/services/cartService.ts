@@ -3,15 +3,15 @@ import { API_BASE_URL } from "@/lib/config";
 
 export const cartService = {
   // GET /api/cart
-  getCart: async (): Promise<CartItemDto[]> => {
-    const response = await fetch(`${API_BASE_URL}/cart`);
+  getCart: async (userId: string): Promise<CartItemDto[]> => {
+    const response = await fetch(`${API_BASE_URL}/cart?userId=${encodeURIComponent(userId)}`);
     if (!response.ok) throw new Error("Failed to fetch cart");
     return response.json();
   },
 
   // POST /api/cart
-  addToCart: async (productId: number, quantity: number = 1): Promise<CartItemDto> => {
-    const response = await fetch(`${API_BASE_URL}/cart`, {
+  addToCart: async (productId: number, quantity: number = 1, userId: string): Promise<CartItemDto> => {
+    const response = await fetch(`${API_BASE_URL}/cart?userId=${encodeURIComponent(userId)}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ productId, quantity }),
@@ -40,8 +40,8 @@ export const cartService = {
   },
 
   // DELETE /api/cart
-  clearCart: async (): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/cart`, {
+  clearCart: async (userId: string): Promise<void> => {
+    const response = await fetch(`${API_BASE_URL}/cart?userId=${encodeURIComponent(userId)}`, {
       method: "DELETE",
     });
     if (!response.ok) throw new Error("Failed to clear cart");

@@ -1,5 +1,5 @@
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
-import { ShoppingCart, Package, LogOut, User } from "lucide-react";
+import { ShoppingCart, Package, LogOut, User, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -23,7 +23,7 @@ export const Header = () => {
   // @ts-ignore - googleLogin added to context but interface might lag
   const { user, logout, googleLogin } = useAuth();
   const { cartItems, removeItem, updateQuantity } = useCart();
-  const { city, pincode, loading, error, detectLocation } = useLocationHook();
+  const { city, pincode, loading, error, detectLocation, updateLocation } = useLocationHook();
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   // Standard router hook for params:
   const [searchParams, setSearchParams] = useSearchParams();
@@ -83,27 +83,46 @@ export const Header = () => {
               <h1 className="text-xl font-bold">Homebase</h1>
             </Link>
 
-            {/* Location Detection */}
-            <div className="hidden md:flex items-center gap-1 text-white/90 hover:text-white cursor-pointer min-w-[140px]" onClick={() => detectLocation()}>
-              <MapPin className="h-4 w-4 flex-shrink-0" />
-              <div className="flex flex-col leading-tight">
-                <span className="text-[10px] text-white/70">Delivering to</span>
-                <span className="text-xs font-bold truncate max-w-[120px] flex items-center gap-1">
-                  {loading ? (
-                    <>
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                      Detecting...
-                    </>
-                  ) : error ? (
-                    "Set Location"
-                  ) : city ? (
-                    `${city} ${pincode ? pincode : ''}`
-                  ) : (
-                    "Update Location"
-                  )}
-                </span>
-              </div>
-            </div>
+            {/* Location Selector */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <div className="hidden md:flex items-center gap-1 text-white/90 hover:text-white cursor-pointer min-w-[140px]">
+                  <MapPin className="h-4 w-4 flex-shrink-0" />
+                  <div className="flex flex-col leading-tight">
+                    <span className="text-[10px] text-white/70">Delivering to</span>
+                    <span className="text-xs font-bold truncate max-w-[120px] flex items-center gap-1">
+                      {loading ? (
+                        <>
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                          Detecting...
+                        </>
+                      ) : error ? (
+                        "Select Location"
+                      ) : city ? (
+                        `${city}`
+                      ) : (
+                        "Select Location"
+                      )}
+                    </span>
+                  </div>
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56">
+                <DropdownMenuLabel>Choose Location</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => detectLocation()} className="cursor-pointer gap-2">
+                  <MapPin className="h-4 w-4" />
+                  <span>Use Current Location</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel className="text-xs text-muted-foreground">Popular Cities</DropdownMenuLabel>
+                {["Hyderabad", "Bangalore", "Mumbai", "Delhi", "Chennai", "Kochi"].map((c) => (
+                  <DropdownMenuItem key={c} onClick={() => updateLocation(c)} className="cursor-pointer">
+                    {c}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             {/* Search Bar */}
             <div className="flex-1 max-w-2xl">
@@ -114,7 +133,7 @@ export const Header = () => {
                   className="w-full px-4 py-2 pr-10 text-sm text-foreground bg-white rounded focus:outline-none focus:ring-2 focus:ring-accent"
                 />
                 <button className="absolute right-2 top-1/2 -translate-y-1/2 text-primary hover:text-primary/80">
-                  <ShoppingCart className="h-5 w-5" />
+                  <Search className="h-5 w-5" />
                 </button>
               </div>
             </div>
@@ -145,25 +164,17 @@ export const Header = () => {
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onSelect={() => {
-                        console.log("Navigating to profile...");
-                        navigate("/profile");
-                      }}
-                      className="cursor-pointer"
-                    >
-                      <User className="mr-2 h-4 w-4" />
-                      <span>Profile</span>
+                    <DropdownMenuItem asChild className="cursor-pointer">
+                      <Link to="/profile" className="flex items-center w-full">
+                        <User className="mr-2 h-4 w-4" />
+                        <span>Profile</span>
+                      </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onSelect={() => {
-                        console.log("Navigating to orders...");
-                        navigate("/orders");
-                      }}
-                      className="cursor-pointer"
-                    >
-                      <Package className="mr-2 h-4 w-4" />
-                      <span>Orders</span>
+                    <DropdownMenuItem asChild className="cursor-pointer">
+                      <Link to="/orders" className="flex items-center w-full">
+                        <Package className="mr-2 h-4 w-4" />
+                        <span>Orders</span>
+                      </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={logout} className="cursor-pointer">

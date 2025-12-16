@@ -30,7 +30,7 @@ export const MiniCart = ({ items, onRemoveItem, onUpdateQuantity }: MiniCartProp
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="outline" size="icon" className="relative hover:shadow-md">
+        <Button variant="outline" size="icon" className="relative hover:shadow-md text-primary hover:text-primary">
           <ShoppingCart className="h-5 w-5" />
           {itemCount > 0 && (
             <Badge

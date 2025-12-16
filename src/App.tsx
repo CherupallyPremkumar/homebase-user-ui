@@ -48,7 +48,7 @@ const App = () => (
                   <Route path="/" element={<Home />} />
                   <Route path="/category/:categoryId" element={<CategoryPage />} />
                   <Route path="/products" element={<CategoryPage />} />
-                  <Route path="/product/:id" element={<ProductDetails />} />
+                  <Route path="/product" element={<ProductDetails />} />
                   <Route path="/cart" element={<Cart />} />
 
                   {/* Protected routes - require login */}

@@ -1,12 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { productService } from "@/features/products/services/productService";
-import { ProductDto } from "@/types/dto";
+import { useLocation } from "@/hooks/useLocation";
 
 export const useProducts = () => {
+    const { city } = useLocation();
+
     return useQuery({
-        queryKey: ["products"],
-        queryFn: productService.getAllProducts,
-        staleTime: 5 * 60 * 1000, // 5 minutes
+        queryKey: ["products", city],
+        queryFn: () => productService.getAllProducts(city),
+        staleTime: 5 * 60 * 1000,
     });
 };
 

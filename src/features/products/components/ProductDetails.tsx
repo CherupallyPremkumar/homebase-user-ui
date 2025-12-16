@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { ProductDto } from "@/types/dto";
 // import { productService } from "../services/productService";
 import { useProduct, useProducts } from "@/hooks/api/useProducts";
@@ -22,14 +22,21 @@ import { QuantitySelector } from "@/components/shared/QuantitySelector";
 import QuickViewModal from "./QuickViewModal";
 
 const ProductDetails = () => {
-  const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
+  const id = searchParams.get("v");
   const navigate = useNavigate();
   const productId = id ? parseInt(id) : 0;
 
-  const { data: product, isLoading: loadingProduct } = useProduct(productId);
+  /*
+   * useProduct returns ProductViewDto { product, reviews }
+   */
+  const { data: productView, isLoading: loadingProduct, error } = useProduct(productId);
+  const product = productView?.product;
+  const reviews = productView?.reviews || [];
+
   const { data: allProducts = [] } = useProducts();
 
-  const loading = loadingProduct; // For compatibility
+  const loading = loadingProduct; // For compatibility with existing code if needed
 
   const [quantity, setQuantity] = useState(1);
   const [selectedProduct, setSelectedProduct] = useState<ProductDto | null>(null);
@@ -37,12 +44,11 @@ const ProductDetails = () => {
   const { addToCart } = useCart();
 
   useEffect(() => {
-    if (product) {
-      addToRecentlyViewed(product);
+    if (productView?.product) {
+      // document.title = `${product?.name} | Handmade`;
+      addToRecentlyViewed(productView.product);
     }
-  }, [product]);
-
-  // Removed manual loadProduct and loadAllProducts functions as they are replaced by hooks
+  }, [productView]);
 
   const handleAddToCart = async () => {
     if (!product) return;
@@ -65,12 +71,14 @@ const ProductDetails = () => {
     );
   }
 
-  if (!product) {
+  if (error || !product) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
         <div className="container mx-auto px-4 py-20 text-center">
-          <p className="text-muted-foreground mb-4">Product not found</p>
+          <h2 className="text-2xl font-display font-bold text-foreground mb-4">
+            Product not found
+          </h2>
           <Button onClick={() => navigate("/")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Shop
@@ -213,7 +221,13 @@ const ProductDetails = () => {
 
         {/* Reviews Section */}
         <Separator className="my-12" />
-        <ProductReviews productId={product.id} productName={product.name} />
+        <section className="bg-white rounded-lg shadow-sm border border-border p-6 sm:p-8">
+          <ProductReviews
+            productId={product.id}
+            productName={product.name}
+            reviews={reviews}
+          />
+        </section>
 
         {/* Recommendations */}
         <Separator className="my-12" />

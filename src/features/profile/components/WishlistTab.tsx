@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import { getWishlist } from "@/features/profile/services/wishlistService";
+import { useWishlistQuery } from "@/features/profile/services/wishlistService";
 import { ProductDto } from "@/types/dto";
 import { ProductCard } from "@/features/products/components/ProductCard";
 import { Loader2, Heart, ShoppingBag } from "lucide-react";
@@ -9,29 +9,7 @@ import { Link } from "react-router-dom";
 
 export const WishlistTab = () => {
     const { user } = useAuth();
-    const [items, setItems] = useState<ProductDto[]>([]);
-    const [loading, setLoading] = useState(true);
-
-    const fetchWishlist = async () => {
-        if (!user) return;
-        try {
-            setLoading(true);
-            const data = await getWishlist(user.email);
-            setItems(data);
-        } catch (error) {
-            console.error("Failed to load wishlist", error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchWishlist();
-
-        // Listen for updates from WishlistButtons on this page or others
-        window.addEventListener("wishlist-updated", fetchWishlist);
-        return () => window.removeEventListener("wishlist-updated", fetchWishlist);
-    }, [user]);
+    const { data: items = [], isLoading: loading } = useWishlistQuery(user?.email);
 
     if (loading) {
         return (

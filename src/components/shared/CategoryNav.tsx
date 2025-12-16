@@ -6,60 +6,20 @@ import {
     HoverCardContent,
     HoverCardTrigger,
 } from "@/components/ui/hover-card";
-import { ChevronDown } from "lucide-react";
-
-const categories = [
-    {
-        title: "Sarees",
-        href: "/category/sarees",
-        description: "Traditional and modern sarees for every occasion.",
-        subcategories: [
-            { title: "Silk Sarees", href: "/category/sarees?sub=silk" },
-            { title: "Cotton Sarees", href: "/category/sarees?sub=cotton" },
-            { title: "Banarasi", href: "/category/sarees?sub=banarasi" },
-            { title: "Kanjivaram", href: "/category/sarees?sub=kanjivaram" },
-            { title: "Chiffon", href: "/category/sarees?sub=chiffon" },
-        ],
-    },
-    {
-        title: "Home Decor",
-        href: "/category/decor",
-        description: "Beautiful handcrafted items to elevate your living space.",
-        subcategories: [
-            { title: "Wall Art", href: "/category/decor?sub=wall-art" },
-            { title: "Vases", href: "/category/decor?sub=vases" },
-            { title: "Cushions", href: "/category/decor?sub=cushions" },
-            { title: "Lighting", href: "/category/decor?sub=lighting" },
-            { title: "Rugs", href: "/category/decor?sub=rugs" },
-        ],
-    },
-    {
-        title: "Food",
-        href: "/category/food",
-        description: "Authentic regional delicacies and organic produce.",
-        subcategories: [
-            { title: "Spices", href: "/category/food?sub=spices" },
-            { title: "Sweets", href: "/category/food?sub=sweets" },
-            { title: "Pickles", href: "/category/food?sub=pickles" },
-            { title: "Snacks", href: "/category/food?sub=snacks" },
-            { title: "Tea & Coffee", href: "/category/food?sub=beverages" },
-        ],
-    },
-    {
-        title: "Handicrafts",
-        href: "/category/crafts",
-        description: "Unique handmade artifacts from skilled artisans.",
-        subcategories: [
-            { title: "Pottery", href: "/category/crafts?sub=pottery" },
-            { title: "Woodwork", href: "/category/crafts?sub=woodwork" },
-            { title: "Metal Art", href: "/category/crafts?sub=metal-art" },
-            { title: "Textiles", href: "/category/crafts?sub=textiles" },
-            { title: "Jewelry", href: "/category/crafts?sub=jewelry" },
-        ],
-    },
-];
+import { ChevronDown, Loader2 } from "lucide-react";
+import { useCategories } from "@/hooks/api/useCategories";
 
 export function CategoryNav() {
+    const { data: categories = [], isLoading: loading } = useCategories();
+
+    if (loading) {
+        return (
+            <div className="flex items-center gap-2 px-3">
+                <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">Loading...</span>
+            </div>
+        );
+    }
 
     return (
         <nav className="flex items-center gap-1">
