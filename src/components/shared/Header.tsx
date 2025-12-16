@@ -13,7 +13,7 @@ import { MiniCart } from "@/features/cart/components/MiniCart";
 import { CartItemDto } from "@/types/dto";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
-import { useLocation as useLocationHook } from "@/hooks/useLocation";
+import { useUserLocation } from "@/hooks/useUserLocation";
 import { MapPin, Loader2 } from "lucide-react";
 import { CategoryNav } from "@/components/shared/CategoryNav";
 import { LoginDialog } from "@/features/auth/components/LoginDialog";
@@ -23,7 +23,7 @@ export const Header = () => {
   // @ts-ignore - googleLogin added to context but interface might lag
   const { user, logout, googleLogin } = useAuth();
   const { cartItems, removeItem, updateQuantity } = useCart();
-  const { city, pincode, loading, error, detectLocation, updateLocation } = useLocationHook();
+  const { city, pincode, loading, error, detectLocation, updateLocation } = useUserLocation();
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   // Standard router hook for params:
   const [searchParams, setSearchParams] = useSearchParams();
@@ -99,7 +99,7 @@ export const Header = () => {
                       ) : error ? (
                         "Select Location"
                       ) : city ? (
-                        `${city}`
+                        `${ city } `
                       ) : (
                         "Select Location"
                       )}

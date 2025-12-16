@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { AddressDto } from "@/types/dto";
 import { AddressDialog } from "./AddressDialog";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/useToast";
 import { updateAddress, deleteAddress } from "../services/profileService";
 
 interface AddressCardProps {

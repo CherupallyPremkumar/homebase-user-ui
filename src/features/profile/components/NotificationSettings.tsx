@@ -5,7 +5,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { NotificationSettingsDto } from "@/types/dto";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/useToast";
 import { updateNotificationSettings } from "../services/profileService";
 
 interface NotificationSettingsProps {

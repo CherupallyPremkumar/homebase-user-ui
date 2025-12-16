@@ -15,10 +15,10 @@ interface ProductCardProps {
   product: ProductDto;
   onAddToCart?: (productId: number) => void;
   onQuickView?: (product: ProductDto) => void;
-  layout?: "grid" | "list" | "masonry";
+  variant?: "default" | "compact" | "featured";
 }
 
-export const ProductCard = ({ product, onAddToCart, onQuickView, layout = "grid" }: ProductCardProps) => {
+export const ProductCard = ({ product, onAddToCart, onQuickView, variant = "default" }: ProductCardProps) => {
   const [quantity, setQuantity] = useState(1);
   const isOutOfStock = product.stock === 0;
   const isLowStock = product.stock > 0 && product.stock <= 5;
@@ -35,7 +35,7 @@ export const ProductCard = ({ product, onAddToCart, onQuickView, layout = "grid"
   };
 
   // List layout - horizontal card
-  if (layout === "list") {
+  if (variant === "compact") {
     return (
       <Card className="overflow-hidden hover-lift group bg-card border-border shadow-sm">
         <div className="flex flex-col sm:flex-row gap-4">
@@ -100,7 +100,7 @@ export const ProductCard = ({ product, onAddToCart, onQuickView, layout = "grid"
   }
 
   // Masonry layout - varied height cards
-  if (layout === "masonry") {
+  if (variant === "featured") {
     return (
       <Card className="overflow-hidden hover-lift group break-inside-avoid mb-4 bg-card border-border shadow-sm">
         <Link to={`/product?v=${product.id}`}>

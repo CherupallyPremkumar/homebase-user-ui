@@ -6,7 +6,7 @@ import { useProducts } from "@/hooks/api/useProducts";
 import { ProductCard } from "@/features/products/components/ProductCard";
 import { Header } from "@/components/shared/Header";
 import { useCart } from "@/hooks/useCart";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/hooks/useToast";
 import { Loader2, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";

@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ProductBadge, getProductBadges } from "./ProductBadge";
 import { Separator } from "@/components/ui/separator";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/hooks/useToast";
 import { ShoppingCart, ArrowLeft, Loader2, Clock, Star, MapPin, BadgeCheck } from "lucide-react";
 import { ProductImageCarousel } from "./ProductImageCarousel";
 import { AnimatedRating } from "@/components/shared/AnimatedRating";
@@ -223,8 +223,7 @@ const ProductDetails = () => {
         <Separator className="my-12" />
         <section className="bg-white rounded-lg shadow-sm border border-border p-6 sm:p-8">
           <ProductReviews
-            productId={product.id}
-            productName={product.name}
+            product={product}
             reviews={reviews}
           />
         </section>

@@ -12,7 +12,7 @@ import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { PaymentMethodSelector, type PaymentMethodType, paymentMethods } from "./PaymentMethodSelector";
 import { ShippingCalculator } from "./ShippingCalculator";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/hooks/useToast";
 import { Loader2, CreditCard } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 

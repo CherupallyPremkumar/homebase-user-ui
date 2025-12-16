@@ -1,0 +1,341 @@
+Frontend Naming Conventions
+Date: December 2025
+Status: ✅ ESTABLISHED
+Scope: Frontend only (backend is temporary mock)
+
+Overview
+This document establishes consistent naming conventions for the frontend codebase. The backend is a temporary mock and will be replaced, so we focus on frontend patterns only.
+
+1. React Hooks
+Pattern: use[Feature][Purpose]
+✅ Recommended
+// Query hooks (React Query)
+useProducts()          // Fetches products
+useProduct(id)         // Fetches single product
+useCategories()        // Fetches categories
+// Mutation hooks
+useAddToCart()         // Adds to cart
+useUpdateProfile()     // Updates profile
+// Context hooks
+useAuth()              // Auth context
+useCart()              // Cart context
+useLocation()          // Location context
+// Utility hooks
+useDebounce()          // Debounce utility
+useLocalStorage()      // LocalStorage utility
+❌ Avoid
+useCartQuery()         // ❌ Too specific (implementation detail)
+useProductsData()      // ❌ Redundant "Data"
+getProducts()          // ❌ Not a hook (missing "use")
+Current Codebase
+Current	Recommended	Action
+useCartQuery()
+useCart()
+✅ Already have 
+useCart()
+ wrapper
+useProducts()
+useProducts()
+✅ Good
+useCategories()
+useCategories()
+✅ Good
+Decision: Keep 
+useCartQuery()
+ as internal implementation, expose 
+useCart()
+ as public API.
+
+2. Services
+Pattern: [feature]Service
+✅ Recommended
+// Service files
+productService.ts      // Product API calls
+cartService.ts         // Cart API calls
+authService.ts         // Auth API calls
+orderService.ts        // Order API calls
+profileService.ts      // Profile API calls
+Service Object Pattern
+// productService.ts
+export const productService = {
+  getAll: () => apiClient.get<ProductDto[]>('/products'),
+  getById: (id: number) => apiClient.get<ProductDto>(`/products/${id}`),
+  create: (data: CreateProductDto) => apiClient.post('/products', data),
+};
+❌ Avoid
+products.ts            // ❌ Not clear it's a service
+ProductService.ts      // ❌ PascalCase (use camelCase)
+product-service.ts     // ❌ Kebab-case (use camelCase)
+Current Codebase
+File	Status
+productService.ts
+✅ Good
+cartService.ts
+✅ Good
+authService.ts
+✅ Good
+orderService.ts
+✅ Good
+Status: Already following convention ✅
+
+3. Components
+Pattern: PascalCase
+✅ Recommended
+// Component files
+ProductCard.tsx        // Product card component
+CartPage.tsx           // Cart page
+Header.tsx             // Header component
+Button.tsx             // Button component
+ErrorBoundary.tsx      // Error boundary
+Component Naming
+// Descriptive, specific names
+export const ProductCard = () => { ... }
+export const MiniCart = () => { ... }
+export const CheckoutForm = () => { ... }
+❌ Avoid
+product-card.tsx       // ❌ Kebab-case
+productCard.tsx        // ❌ camelCase
+Card.tsx               // ❌ Too generic (what kind of card?)
+Component Organization
+features/
+  products/
+    components/
+      ProductCard.tsx       // ✅ Feature-specific
+      ProductDetails.tsx    // ✅ Feature-specific
+  cart/
+    components/
+      CartPage.tsx          // ✅ Feature-specific
+      MiniCart.tsx          // ✅ Feature-specific
+4. Types & Interfaces
+Pattern: PascalCase + Type/Interface/Dto
+✅ Recommended
+// DTOs (Data Transfer Objects - from API)
+interface ProductDto { ... }
+interface CartItemDto { ... }
+interface OrderDto { ... }
+// Props
+interface ProductCardProps { ... }
+interface ButtonProps { ... }
+// State/Domain types
+interface User { ... }
+interface CartState { ... }
+type PaymentMethod = 'card' | 'upi' | 'cod';
+❌ Avoid
+interface product { ... }           // ❌ lowercase
+interface IProduct { ... }          // ❌ Hungarian notation
+type ProductType { ... }            // ❌ Redundant "Type"
+interface ProductInterface { ... }  // ❌ Redundant "Interface"
+Current Codebase
+// types/dto.ts - ✅ Good
+export interface ProductDto { ... }
+export interface CartItemDto { ... }
+export interface OrderDto { ... }
+5. Files & Folders
+Pattern: camelCase for files, PascalCase for components
+✅ Recommended
+src/
+  lib/
+    config.ts              // ✅ camelCase utility
+    apiClient.ts           // ✅ camelCase utility
+    errorHandler.ts        // ✅ camelCase utility
+  
+  components/
+    ErrorBoundary.tsx      // ✅ PascalCase component
+    Loading.tsx            // ✅ PascalCase component
+  
+  features/
+    products/
+      services/
+        productService.ts  // ✅ camelCase service
+      components/
+        ProductCard.tsx    // ✅ PascalCase component
+❌ Avoid
+src/
+  lib/
+    Config.ts              // ❌ PascalCase for non-component
+    api-client.ts          // ❌ Kebab-case
+  
+  components/
+    error-boundary.tsx     // ❌ Kebab-case component
+6. Variables & Functions
+Pattern: camelCase
+✅ Recommended
+// Variables
+const userId = 'user123';
+const cartItems = [];
+const isLoading = false;
+// Functions
+const handleClick = () => { ... };
+const fetchProducts = async () => { ... };
+const calculateTotal = (items) => { ... };
+// Boolean variables (use is/has/should prefix)
+const isAuthenticated = true;
+const hasPermission = false;
+const shouldRedirect = true;
+❌ Avoid
+const UserID = 'user123';          // ❌ PascalCase
+const cart_items = [];             // ❌ snake_case
+const Loading = false;             // ❌ PascalCase for variable
+const authenticated = true;        // ❌ Missing "is" prefix
+7. Constants
+Pattern: SCREAMING_SNAKE_CASE for true constants, camelCase for config
+✅ Recommended
+// True constants (never change)
+const MAX_RETRY_ATTEMPTS = 3;
+const API_TIMEOUT = 5000;
+const DEFAULT_PAGE_SIZE = 20;
+// Config objects (use camelCase)
+export const CACHE_TIMES = {
+  products: 5 * 60 * 1000,
+  categories: 24 * 60 * 60 * 1000,
+} as const;
+// Enums
+enum OrderStatus {
+  Pending = 'PENDING',
+  Confirmed = 'CONFIRMED',
+  Shipped = 'SHIPPED',
+}
+8. Event Handlers
+Pattern: handle[Event] or on[Event]
+✅ Recommended
+// Component internal handlers
+const handleClick = () => { ... };
+const handleSubmit = (e: FormEvent) => { ... };
+const handleChange = (value: string) => { ... };
+// Props (callbacks)
+interface ButtonProps {
+  onClick?: () => void;
+  onSubmit?: (data: FormData) => void;
+  onChange?: (value: string) => void;
+}
+9. API Endpoints (Frontend Reference)
+Pattern: Descriptive, RESTful
+✅ Recommended
+// productService.ts
+const endpoints = {
+  products: '/products',
+  productById: (id: number) => `/products/${id}`,
+  categories: '/categories',
+  cart: '/cart',
+};
+Note: Backend naming is temporary. When real backend is implemented, frontend services will adapt to new endpoints.
+
+10. Folder Structure
+Recommended Structure
+src/
+  features/              # Feature-based organization
+    [feature]/
+      components/        # Feature components
+      services/          # API services
+      hooks/             # Feature-specific hooks
+      types/             # Feature-specific types
+      __tests__/         # Tests
+  
+  components/            # Shared components
+    ui/                  # UI library (shadcn)
+    ErrorBoundary.tsx
+    Loading.tsx
+  
+  lib/                   # Utilities
+    config.ts
+    apiClient.ts
+    errorHandler.ts
+    utils.ts
+  
+  hooks/                 # Shared hooks
+    api/                 # API hooks
+    use-toast.ts
+    use-mobile.tsx
+  
+  types/                 # Shared types
+    dto.ts
+11. Import Order
+Recommended Order
+// 1. External libraries
+import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+// 2. Internal absolute imports (@ alias)
+import { Button } from '@/components/ui/button';
+import { productService } from '@/features/products/services/productService';
+// 3. Relative imports
+import { ProductCard } from './ProductCard';
+import { calculateTotal } from '../utils';
+// 4. Types
+import type { ProductDto } from '@/types/dto';
+// 5. Styles (if any)
+import './styles.css';
+12. Migration Guide
+Current Issues
+Current	Issue	Recommended
+useCartQuery()
+Implementation detail exposed	Keep internal, use 
+useCart()
+Backend naming	Temporary mock	Ignore for now
+No Changes Needed
+The codebase already follows most conventions:
+
+✅ Services: productService, cartService
+✅ Components: 
+ProductCard
+, CartPage
+✅ Hooks: 
+useProducts()
+, 
+useCategories()
+✅ Types: 
+ProductDto
+, 
+CartItemDto
+13. Quick Reference
+Category	Pattern	Example
+Hooks	use[Feature]	
+useProducts()
+Services	[feature]Service	productService
+Components	PascalCase	
+ProductCard
+Types	PascalCase	
+ProductDto
+Variables	camelCase	cartItems
+Constants	SCREAMING_SNAKE_CASE	MAX_ITEMS
+Files (util)	camelCase.ts	
+apiClient.ts
+Files (component)	PascalCase.tsx	
+Button.tsx
+Event handlers	handle[Event]	handleClick
+Booleans	is/has/should	isLoading
+14. Enforcement
+TypeScript
+Already enforced via strict mode:
+
+✅ Type names must be PascalCase
+✅ Unused variables caught
+ESLint (Recommended)
+{
+  "rules": {
+    "camelcase": ["error", { "properties": "never" }],
+    "@typescript-eslint/naming-convention": [
+      "error",
+      {
+        "selector": "interface",
+        "format": ["PascalCase"]
+      },
+      {
+        "selector": "typeAlias",
+        "format": ["PascalCase"]
+      }
+    ]
+  }
+}
+Summary
+Current Status: Codebase already follows most conventions ✅
+
+Key Points:
+
+Backend naming is temporary (ignore for now)
+Frontend conventions are consistent
+useCartQuery()
+ is internal, 
+useCart()
+ is public API
+No major refactoring needed
+Recommendation: Document and maintain current patterns.

@@ -1,6 +1,6 @@
-import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback, useMemo } from "react";
 import { CartItemDto } from "@/types/dto";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/hooks/useToast";
 import { useCartQuery } from "@/hooks/api/useCartQuery";
 
 interface CartContextType {
@@ -32,9 +32,16 @@ export const CartProvider = ({ children }: CartProviderProps) => {
         refreshCart: refetchCart,
     } = useCartQuery();
 
-    // Derived values
-    const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-    const cartTotal = cartItems.reduce((sum, item) => sum + item.subtotal, 0);
+    // Memoized derived values - only recalculate when cartItems changes
+    const cartCount = useMemo(
+        () => cartItems.reduce((sum, item) => sum + item.quantity, 0),
+        [cartItems]
+    );
+
+    const cartTotal = useMemo(
+        () => cartItems.reduce((sum, item) => sum + item.subtotal, 0),
+        [cartItems]
+    );
 
     const refreshCart = async () => {
         await refetchCart();

@@ -9,6 +9,8 @@ import { AuthProvider } from "@/features/auth/context/AuthContext";
 import { LocationProvider } from "@/contexts/LocationContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { ProtectedRoute } from "@/features/auth/components/ProtectedRoute";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+
 // Lazy load components
 const Home = lazy(() => import("@/features/home/pages/Home"));
 const ProductDetails = lazy(() => import("@/features/products/components/ProductDetails"));
@@ -30,41 +32,67 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <LocationProvider>
-          <AuthProvider>
+        <AuthProvider>
+          <LocationProvider>
             <CartProvider>
-              <Suspense
-                fallback={
-                  <div className="flex items-center justify-center min-h-screen">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                  </div>
-                }
-              >
-                <Routes>
-                  {/* Public routes */}
-                  <Route path="/api-test" element={<ApiTest />} />
+              <ErrorBoundary>
+                <Suspense
+                  fallback={
+                    <div className="min-h-screen bg-background flex items-center justify-center">
+                      <div className="flex flex-col items-center gap-4">
+                        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                        <p className="text-muted-foreground">Loading...</p>
+                      </div>
+                    </div>
+                  }
+                >
+                  <Routes>
+                    {/* Public browsing routes - no login required */}
+                    <Route path="/" element={<Home />} />
+                    <Route path="/product" element={<ProductDetails />} />
+                    <Route path="/cart" element={<Cart />} />
+                    <Route path="/products" element={<CategoryPage />} />
+                    <Route path="/category/:categoryName" element={<CategoryPage />} />
 
-                  {/* Public browsing routes - no login required */}
-                  <Route path="/" element={<Home />} />
-                  <Route path="/category/:categoryId" element={<CategoryPage />} />
-                  <Route path="/products" element={<CategoryPage />} />
-                  <Route path="/product" element={<ProductDetails />} />
-                  <Route path="/cart" element={<Cart />} />
+                    {/* Protected routes - require login */}
+                    <Route
+                      path="/checkout"
+                      element={
+                        <ProtectedRoute>
+                          <Checkout />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route path="/order-confirmation/:orderId" element={<OrderConfirmation />} />
+                    <Route path="/payment-failed" element={<PaymentFailed />} />
+                    <Route
+                      path="/my-orders"
+                      element={
+                        <ProtectedRoute>
+                          <MyOrders />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/profile"
+                      element={
+                        <ProtectedRoute>
+                          <Profile />
+                        </ProtectedRoute>
+                      }
+                    />
 
-                  {/* Protected routes - require login */}
-                  <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
-                  <Route path="/order/:orderId" element={<ProtectedRoute><OrderConfirmation /></ProtectedRoute>} />
-                  <Route path="/payment-failed" element={<ProtectedRoute><PaymentFailed /></ProtectedRoute>} />
-                  <Route path="/orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
-                  <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+                    {/* Public routes */}
+                    <Route path="/api-test" element={<ApiTest />} />
 
-                  {/* Catch-all route */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Suspense>
+                    {/* Catch-all route */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </Suspense>
+              </ErrorBoundary>
             </CartProvider>
-          </AuthProvider>
-        </LocationProvider>
+          </LocationProvider>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

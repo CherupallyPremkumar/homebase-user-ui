@@ -8,7 +8,7 @@ import { CartItemCard } from "./CartItemCard";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/hooks/useToast";
 import { Loader2, ShoppingBag, ArrowRight } from "lucide-react";
 
 const Cart = () => {

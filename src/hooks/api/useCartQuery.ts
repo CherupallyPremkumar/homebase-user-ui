@@ -3,7 +3,8 @@ import { cartService } from "@/features/cart/services/cartService";
 import { CartItemDto } from "@/types/dto";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { getGuestId } from "@/lib/utils";
-import { useEffect, useState } from "react";
+import { CACHE_TIMES } from "@/lib/constants";
+
 
 export const useCartQuery = () => {
     const queryClient = useQueryClient();
@@ -17,7 +18,7 @@ export const useCartQuery = () => {
     const cartQuery = useQuery<CartItemDto[]>({
         queryKey: ["cart", effectiveUserId],
         queryFn: () => cartService.getCart(effectiveUserId),
-        staleTime: 0,
+        staleTime: CACHE_TIMES.ALWAYS_FRESH, // Always refetch cart data
         enabled: !authLoading, // Wait for auth to settle
     });
 

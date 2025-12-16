@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import * as authService from "../services/authService";
+import { secureTokenStorage } from "@/lib/secureStorage";
 
 export interface AuthUser {
   id: string;
@@ -13,10 +14,10 @@ export interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
-  socialLogin: (provider: string) => Promise<void>; // Simulated
-  googleLogin: (code: string) => Promise<void>; // Real
-  logout: () => void;
-  getAuthToken: () => string | null;
+  socialLogin: (provider: string) => Promise<void>;
+  googleLogin: (code: string) => Promise<void>;
+  logout: () => Promise<void>;
+  getAuthToken: () => Promise<string | null>;
 }
 
 export const AuthContext = createContext<AuthContextType>({
@@ -26,8 +27,8 @@ export const AuthContext = createContext<AuthContextType>({
   login: async () => { },
   socialLogin: async () => { },
   googleLogin: async () => { },
-  logout: () => { },
-  getAuthToken: () => null,
+  logout: async () => { },
+  getAuthToken: async () => null,
 });
 
 interface AuthProviderProps {
@@ -39,41 +40,40 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Load user from localStorage on mount
+  // Load user from secure storage on mount
   useEffect(() => {
-    const storedUser = localStorage.getItem("auth_user") || sessionStorage.getItem("auth_user");
-    const storedToken = localStorage.getItem("auth_token") || sessionStorage.getItem("auth_token");
-
-    if (storedUser && storedToken) {
+    const loadUser = async () => {
       try {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
+        const storedUser = await secureTokenStorage.getUser();
+        if (storedUser) {
+          setUser(storedUser);
+        }
       } catch (error) {
-        console.error("Failed to parse stored user:", error);
-        localStorage.removeItem("auth_user");
-        localStorage.removeItem("auth_token");
-        sessionStorage.removeItem("auth_user");
-        sessionStorage.removeItem("auth_token");
+        console.error("Failed to load user from secure storage:", error);
+      } finally {
+        setIsLoading(false);
       }
-    }
-    setIsLoading(false);
+    };
+
+    loadUser();
   }, []);
 
   const login = async (email: string, password: string, rememberMe: boolean = false) => {
-    // Call the actual auth service
     const response = await authService.login(email, password);
 
-    // Mock/Service User Logic
     const authUser: AuthUser = {
       id: response.user.id,
       email: response.user.email,
       name: response.user.name,
     };
 
-    // Store in localStorage or sessionStorage based on rememberMe
-    const storage = rememberMe ? localStorage : sessionStorage;
-    storage.setItem("auth_user", JSON.stringify(authUser));
-    storage.setItem("auth_token", response.token);
+    // Store securely with encryption
+    await secureTokenStorage.setToken(
+      response.token,
+      authUser,
+      rememberMe,
+      rememberMe ? 24 * 7 : 24 // 7 days if remember me, else 24 hours
+    );
 
     setUser(authUser);
   };
@@ -87,9 +87,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       name: response.user.name,
     };
 
-    // Always store social login in local storage for now (or session)
-    localStorage.setItem("auth_user", JSON.stringify(authUser));
-    localStorage.setItem("auth_token", response.token);
+    // Store securely (default 24 hours)
+    await secureTokenStorage.setToken(response.token, authUser, true, 24);
 
     setUser(authUser);
   };
@@ -103,24 +102,20 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       name: response.user.name,
     };
 
-    // Store session
-    localStorage.setItem("auth_user", JSON.stringify(authUser));
-    localStorage.setItem("auth_token", response.token);
+    // Store securely (default 24 hours)
+    await secureTokenStorage.setToken(response.token, authUser, true, 24);
 
     setUser(authUser);
   };
 
-  const logout = () => {
-    localStorage.removeItem("auth_user");
-    localStorage.removeItem("auth_token");
-    sessionStorage.removeItem("auth_user");
-    sessionStorage.removeItem("auth_token");
+  const logout = async () => {
+    await secureTokenStorage.clearToken();
     setUser(null);
     navigate("/");
   };
 
-  const getAuthToken = (): string | null => {
-    return localStorage.getItem("auth_token") || sessionStorage.getItem("auth_token");
+  const getAuthToken = async (): Promise<string | null> => {
+    return secureTokenStorage.getToken();
   };
 
   return (

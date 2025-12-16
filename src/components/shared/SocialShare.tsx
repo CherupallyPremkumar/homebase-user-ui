@@ -5,7 +5,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/hooks/useToast";
 
 interface SocialShareProps {
   url?: string;

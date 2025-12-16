@@ -10,7 +10,7 @@ import { AddressCard } from "./AddressCard";
 import { NotificationSettings } from "./NotificationSettings";
 import { WishlistTab } from "./WishlistTab";
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/useToast";
 import { getProfile } from "../services/profileService";
 import { getOrders } from "@/features/orders/services/orderService";
 import { CustomerProfileDto, OrderDto } from "@/types/dto";

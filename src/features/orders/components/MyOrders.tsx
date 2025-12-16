@@ -3,7 +3,7 @@ import { OrderDto } from "@/types/dto";
 import { orderService } from "../services/orderService";
 import { Header } from "@/components/shared/Header";
 import { OrderCard } from "./OrderCard";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/hooks/useToast";
 import { Loader2, Package } from "lucide-react";
 
 const MyOrders = () => {

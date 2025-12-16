@@ -6,7 +6,7 @@ import { Header } from "@/components/shared/Header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/hooks/useToast";
 import { CheckCircle2, Loader2, Package, MapPin, Phone, Mail } from "lucide-react";
 
 const OrderConfirmation = () => {

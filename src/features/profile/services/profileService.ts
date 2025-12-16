@@ -4,115 +4,55 @@ import {
   NotificationSettingsDto,
   UpdateProfileDto,
 } from "@/types/dto";
-import { API_BASE_URL } from "@/lib/config";
+import { apiClient } from "@/lib/apiClient";
 
-// Mock profile data for development
-const mockProfile: CustomerProfileDto = {
-  id: "customer_123",
-  name: "John Doe",
-  email: "john@example.com",
-  phone: "+91-9876543210",
-  addresses: [
-    {
-      id: "addr_1",
-      label: "Home",
-      fullName: "John Doe",
-      phone: "+91-9876543210",
-      addressLine1: "123 Main Street",
-      addressLine2: "Apartment 4B",
-      city: "Mumbai",
-      state: "Maharashtra",
-      pincode: "400001",
-      isDefault: true,
-    },
-  ],
-  notificationSettings: {
-    orderUpdates: true,
-    promotions: true,
-    newsletter: false,
-  },
-};
+/**
+ * Profile Service
+ * All profile data comes from backend API
+ */
 
 /**
  * Get customer profile
  */
 export const getProfile = async (email?: string): Promise<CustomerProfileDto> => {
   const url = email
-    ? `${API_BASE_URL}/customer/profile?email=${encodeURIComponent(email)}`
-    : `${API_BASE_URL}/customer/profile`;
+    ? `/customer/profile?email=${encodeURIComponent(email)}`
+    : `/customer/profile`;
 
-  const response = await fetch(url);
-  if (!response.ok) throw new Error("Failed to fetch profile");
-  return response.json();
+  return apiClient.get<CustomerProfileDto>(url);
 };
 
 /**
  * Update customer profile
  */
-export const updateProfile = async (
-  data: UpdateProfileDto
-): Promise<CustomerProfileDto> => {
-  const response = await fetch(`${API_BASE_URL}/customer/profile`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) throw new Error("Failed to update profile");
-  return response.json();
+export const updateProfile = async (data: UpdateProfileDto): Promise<CustomerProfileDto> => {
+  return apiClient.put<CustomerProfileDto>('/customer/profile', data);
 };
 
 /**
  * Add new address
  */
-export const addAddress = async (
-  address: Omit<AddressDto, "id">
-): Promise<AddressDto> => {
-  const response = await fetch(`${API_BASE_URL}/customer/address`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(address),
-  });
-  if (!response.ok) throw new Error("Failed to add address");
-  return response.json();
+export const addAddress = async (address: Omit<AddressDto, "id">): Promise<AddressDto> => {
+  return apiClient.post<AddressDto>('/customer/address', address);
 };
 
 /**
- * Update address
+ * Update existing address
  */
-export const updateAddress = async (
-  addressId: string,
-  address: Partial<AddressDto>
-): Promise<AddressDto> => {
-  const response = await fetch(`${API_BASE_URL}/customer/address/${addressId}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(address),
-  });
-  if (!response.ok) throw new Error("Failed to update address");
-  return response.json();
+export const updateAddress = async (addressId: string, address: Partial<AddressDto>): Promise<AddressDto> => {
+  return apiClient.put<AddressDto>(`/customer/address/${addressId}`, address);
 };
 
 /**
  * Delete address
  */
 export const deleteAddress = async (addressId: string): Promise<void> => {
-  const response = await fetch(`${API_BASE_URL}/customer/address/${addressId}`, {
-    method: "DELETE",
-  });
-  if (!response.ok) throw new Error("Failed to delete address");
+  return apiClient.delete<void>(`/customer/address/${addressId}`);
 };
 
 /**
  * Update notification settings
  */
-export const updateNotificationSettings = async (
-  settings: NotificationSettingsDto
-): Promise<NotificationSettingsDto> => {
-  const response = await fetch(`${API_BASE_URL}/customer/notifications`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(settings),
-  });
-  if (!response.ok) throw new Error("Failed to update notifications");
-  return response.json();
+export const updateNotificationSettings = async (settings: NotificationSettingsDto): Promise<NotificationSettingsDto> => {
+  return apiClient.put<NotificationSettingsDto>('/customer/notifications', settings);
 };

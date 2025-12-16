@@ -3,7 +3,7 @@
  * Handles customer login/logout
  */
 
-import { API_BASE_URL } from "@/lib/config";
+import { apiClient } from "@/lib/apiClient";
 
 export interface LoginRequest {
   email: string;
@@ -29,18 +29,11 @@ export const login = async (
   email: string,
   password: string
 ): Promise<LoginResponse> => {
-  const response = await fetch(`${API_BASE_URL}/customer/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
-  });
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error.message || "Login failed");
-  }
-
-  return response.json();
+  return apiClient.post<LoginResponse>(
+    '/customer/login',
+    { email, password },
+    { skipAuth: true } // Login doesn't require existing auth
+  );
 };
 
 /**
@@ -50,17 +43,10 @@ export const login = async (
 export const socialLogin = async (
   provider: string
 ): Promise<LoginResponse> => {
-  const response = await fetch(`${API_BASE_URL}/customer/login/${provider}`, {
-    method: "GET", // Backend uses GET for simulation, normally this is a redirect
-    headers: { "Content-Type": "application/json" },
-  });
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error.message || `${provider} login failed`);
-  }
-
-  return response.json();
+  return apiClient.get<LoginResponse>(
+    `/customer/login/${provider}`,
+    { skipAuth: true }
+  );
 };
 
 /**
@@ -70,34 +56,26 @@ export const socialLogin = async (
 export const googleLogin = async (
   code: string
 ): Promise<LoginResponse> => {
-  const response = await fetch(`${API_BASE_URL}/customer/login/google`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ code }),
-  });
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error.message || "Google login failed");
-  }
-
-  return response.json();
+  return apiClient.post<LoginResponse>(
+    '/customer/login/google',
+    { code },
+    { skipAuth: true }
+  );
 };
 
 /**
  * Get Google Auth URL from Backend
  */
 export const getGoogleAuthUrl = async (): Promise<{ url: string }> => {
-  const response = await fetch(`${API_BASE_URL}/customer/login/url/google`);
-  if (!response.ok) {
-    throw new Error("Failed to get Google Auth URL");
-  }
-  return response.json();
+  return apiClient.get<{ url: string }>(
+    '/customer/login/url/google',
+    { skipAuth: true }
+  );
 };
 
 /**
  * Logout customer and clear session
  */
 export const logout = async (): Promise<void> => {
-  await fetch(`${API_BASE_URL}/customer/logout`, { method: "POST" });
+  return apiClient.post<void>('/customer/logout');
 };

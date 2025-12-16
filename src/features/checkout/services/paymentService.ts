@@ -1,18 +1,12 @@
 import { CreatePaymentRequestDto, CreatePaymentResponseDto } from "@/types/dto";
-import { API_BASE_URL } from "@/lib/config";
+import { apiClient } from "@/lib/apiClient";
 
 export const paymentService = {
   // POST /api/payment/create
   createPayment: async (
     request: CreatePaymentRequestDto
   ): Promise<CreatePaymentResponseDto> => {
-    const response = await fetch(`${API_BASE_URL}/payment/create`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(request),
-    });
-    if (!response.ok) throw new Error("Failed to create payment");
-    return response.json();
+    return apiClient.post<CreatePaymentResponseDto>('/payment/create', request);
   },
 
   // POST /api/payment/callback
@@ -23,13 +17,7 @@ export const paymentService = {
     orderId?: string;
     message?: string;
   }> => {
-    const response = await fetch(`${API_BASE_URL}/payment/callback`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ transactionId }),
-    });
-    if (!response.ok) throw new Error("Failed to process payment callback");
-    return response.json();
+    return apiClient.post('/payment/callback', { transactionId });
   },
 
   // GET /api/payment/status/{transactionId}
@@ -39,10 +27,6 @@ export const paymentService = {
     status: "PENDING" | "SUCCESS" | "FAILED";
     orderId?: string;
   }> => {
-    const response = await fetch(
-      `${API_BASE_URL}/payment/status/${transactionId}`
-    );
-    if (!response.ok) throw new Error("Failed to check payment status");
-    return response.json();
+    return apiClient.get(`/payment/status/${transactionId}`);
   },
 };

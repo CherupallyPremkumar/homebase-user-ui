@@ -6,16 +6,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { toast } from "@/hooks/use-toast";
-import { ReviewDto } from "@/types/dto";
+import { toast } from "@/hooks/useToast";
+import { ReviewDto, ProductDto } from "@/types/dto";
 
 interface ProductReviewsProps {
-  productId: number;
-  productName: string;
+  product: ProductDto;
   reviews?: ReviewDto[];
 }
 
-export const ProductReviews = ({ productId, productName, reviews: initialReviews = [] }: ProductReviewsProps) => {
+export const ProductReviews = ({ product, reviews: initialReviews = [] }: ProductReviewsProps) => {
   const [reviews, setReviews] = useState<ReviewDto[]>(initialReviews);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [newReview, setNewReview] = useState({
@@ -95,10 +94,10 @@ export const ProductReviews = ({ productId, productName, reviews: initialReviews
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
-                    className={`h-5 w-5 ${i < Math.round(averageRating)
-                      ? "fill-primary text-primary"
-                      : "text-border"
-                      }`}
+                    className={`h - 5 w - 5 ${i < Math.round(averageRating)
+                        ? "fill-primary text-primary"
+                        : "text-border"
+                      } `}
                   />
                 ))}
               </div>
@@ -120,7 +119,7 @@ export const ProductReviews = ({ productId, productName, reviews: initialReviews
               <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
                 <div
                   className="h-full bg-primary transition-all duration-500"
-                  style={{ width: `${percentage}%` }}
+                  style={{ width: `${percentage}% ` }}
                 />
               </div>
               <span className="text-sm text-muted-foreground w-12 text-right">
@@ -157,10 +156,10 @@ export const ProductReviews = ({ productId, productName, reviews: initialReviews
                     className="transition-transform hover:scale-110"
                   >
                     <Star
-                      className={`h-8 w-8 ${rating <= newReview.rating
-                        ? "fill-primary text-primary"
-                        : "text-border"
-                        }`}
+                      className={`h - 8 w - 8 ${rating <= newReview.rating
+                          ? "fill-primary text-primary"
+                          : "text-border"
+                        } `}
                     />
                   </button>
                 ))}
@@ -236,10 +235,10 @@ export const ProductReviews = ({ productId, productName, reviews: initialReviews
                     {[...Array(5)].map((_, i) => (
                       <Star
                         key={i}
-                        className={`h-4 w-4 ${i < review.rating
-                          ? "fill-primary text-primary"
-                          : "text-border"
-                          }`}
+                        className={`h - 4 w - 4 ${i < review.rating
+                            ? "fill-primary text-primary"
+                            : "text-border"
+                          } `}
                       />
                     ))}
                   </div>
