@@ -1,23 +1,25 @@
-import { OrderDto, OrderPreviewDto } from "@/types/dto";
-import { apiClient } from "@/lib/apiClient";
+/**
+ * Order Service
+ * Uses shared service from @homebase/shared
+ */
 
+import { createOrderService } from '@homebase/shared';
+import { apiClient } from '@/lib/apiClient';
+
+const baseOrderService = createOrderService(apiClient);
+
+// Export service with additional methods
 export const orderService = {
-  getAllOrders: async (): Promise<OrderDto[]> => {
-    return apiClient.get<OrderDto[]>('/order');
-  },
-
-  getOrderById: async (orderId: string): Promise<OrderDto> => {
-    return apiClient.get<OrderDto>(`/order/${orderId}`);
-  },
-
-  createOrder: async (orderData: Partial<OrderDto>): Promise<OrderDto> => {
-    return apiClient.post<OrderDto>('/order', orderData);
-  },
-
-  getOrderPreview: async (cartItems: any[]): Promise<OrderPreviewDto> => {
-    return apiClient.post<OrderPreviewDto>('/order/preview', { items: cartItems });
-  },
+  ...baseOrderService,
+  previewOrder: baseOrderService.getOrderPreview, // Alias for backward compatibility
 };
 
-// Legacy export for backwards compatibility
-export const getOrders = orderService.getAllOrders;
+// Re-export individual methods for backward compatibility
+export const getAllOrders = orderService.getAllOrders;
+export const getOrderById = orderService.getOrderById;
+export const createOrder = orderService.createOrder;
+export const getOrderPreview = orderService.getOrderPreview;
+
+// Aliases for backward compatibility
+export const getOrders = getAllOrders;
+export const previewOrder = getOrderPreview;

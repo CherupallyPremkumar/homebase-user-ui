@@ -1,46 +1,39 @@
-import { ProductDto } from "@/types/dto";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { CACHE_TIMES } from "@/lib/constants";
-import { apiClient } from "@/lib/apiClient";
+/**
+ * Wishlist Service
+ * Uses shared service from @homebase/shared
+ */
 
-interface WishlistToggleResponse {
-    added: boolean;
-    message: string;
-}
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { createWishlistService } from '@homebase/shared';
+import { apiClient } from '@/lib/apiClient';
+import { CACHE_TIMES } from '@/lib/constants';
 
-export const getWishlist = async (email: string | undefined): Promise<ProductDto[]> => {
-    if (!email) return [];
-    try {
-        return await apiClient.get<ProductDto[]>(`/wishlist?email=${email}`);
-    } catch (error) {
-        console.error("Error fetching wishlist:", error);
-        return [];
-    }
-};
+export const wishlistService = createWishlistService(apiClient);
 
-export const toggleWishlist = async (email: string, productId: number): Promise<WishlistToggleResponse> => {
-    return apiClient.post<WishlistToggleResponse>(
-        `/wishlist/toggle?email=${email}&productId=${productId}`
-    );
-};
-
-export const useWishlistQuery = (email: string | undefined) => {
+/**
+ * React Query hook for wishlist
+ */
+export const useWishlistQuery = (email?: string) => {
     return useQuery({
         queryKey: ['wishlist', email],
-        queryFn: () => getWishlist(email),
+        queryFn: () => wishlistService.getWishlist(email),
         enabled: !!email,
-        staleTime: CACHE_TIMES.SHORT, // 5 minutes
+        staleTime: CACHE_TIMES.MEDIUM,
+        gcTime: CACHE_TIMES.MEDIUM,
     });
 };
 
+/**
+ * React Query mutation for toggling wishlist
+ */
 export const useWishlistToggleMutation = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
         mutationFn: ({ email, productId }: { email: string; productId: number }) =>
-            toggleWishlist(email, productId),
-        onSuccess: (_, variables) => {
-            queryClient.invalidateQueries({ queryKey: ['wishlist', variables.email] });
+            wishlistService.toggleWishlist(email, productId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['wishlist'] });
         },
     });
 };

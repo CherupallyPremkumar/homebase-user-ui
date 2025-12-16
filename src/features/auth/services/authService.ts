@@ -1,81 +1,17 @@
 /**
- * Authentication Service
- * Handles customer login/logout
+ * Auth Service
+ * Uses shared service from @homebase/shared
  */
 
-import { apiClient } from "@/lib/apiClient";
+import { createAuthService } from '@homebase/shared';
+import { apiClient } from '@/lib/apiClient';
 
-export interface LoginRequest {
-  email: string;
-  password: string;
-}
+export const authService = createAuthService(apiClient);
 
-export interface LoginResponse {
-  token: string;
-  user: {
-    id: string;
-    email: string;
-    name: string;
-  };
-}
-
-/**
- * Login customer
- * @param email - Customer email
- * @param password - Customer password
- * @returns Authentication token and user data
- */
-export const login = async (
-  email: string,
-  password: string
-): Promise<LoginResponse> => {
-  return apiClient.post<LoginResponse>(
-    '/customer/login',
-    { email, password },
-    { skipAuth: true } // Login doesn't require existing auth
-  );
-};
-
-/**
- * Login with Social Provider (Simulated)
- * @param provider - 'google' | 'github'
- */
-export const socialLogin = async (
-  provider: string
-): Promise<LoginResponse> => {
-  return apiClient.get<LoginResponse>(
-    `/customer/login/${provider}`,
-    { skipAuth: true }
-  );
-};
-
-/**
- * Login with Google Code (Real)
- * @param code - Authorization Code from Google
- */
-export const googleLogin = async (
-  code: string
-): Promise<LoginResponse> => {
-  return apiClient.post<LoginResponse>(
-    '/customer/login/google',
-    { code },
-    { skipAuth: true }
-  );
-};
-
-/**
- * Get Google Auth URL from Backend
- */
-export const getGoogleAuthUrl = async (): Promise<{ url: string }> => {
-  return apiClient.get<{ url: string }>(
-    '/customer/login/url/google',
-    { skipAuth: true }
-  );
-};
-
-/**
- * Logout customer and clear session
- */
-export const logout = async (): Promise<void> => {
-  return apiClient.post<void>('/customer/logout');
-};
+// Re-export individual methods for backward compatibility
+export const login = authService.login;
+export const register = authService.register;
+export const logout = authService.logout;
+export const getGoogleAuthUrl = authService.getGoogleAuthUrl;
+export const googleLogin = authService.googleLogin;
+export const socialLogin = authService.socialLogin;
