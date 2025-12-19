@@ -14,6 +14,7 @@
     "test:coverage": "vitest --coverage"
   },
   "dependencies": {
+    "@homebase/shared": "git+https://github.com/CherupallyPremkumar/homebase-shared.git#v1.0.0",
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-alert-dialog": "^1.1.14",
